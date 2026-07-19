@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FDF8F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1218" media="(prefers-color-scheme: dark)">
+<title>Cycle · Meal & Routine Planner</title>
+<meta name="apple-mobile-web-app-title" content="Cycle">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+/* ── LIGHT THEME (default) ─────────────────────────────────────── */
+:root {
+  --bg: #FDF8F5;
+  --surface: #FFFFFF;
+  --surface2: #F5EEE9;
+  --surface3: #EDE4DC;
+  --border: #E8DDD6;
+  --border-soft: #F0E8E2;
+  --text: #2C1F1A;
+  --text-soft: #5C4A42;
+  --muted: #9C8880;
+  --shadow: 0 2px 12px rgba(44,31,26,0.08);
+  --shadow-lg: 0 8px 32px rgba(44,31,26,0.12);
+
+  /* Phase colours — warm, vivid, feminine */
+  --p1: #E8524A;        /* Coral red — menstrual */
+  --p1-soft: #F4938F;
+  --p1bg: #FFF0EF;
+  --p1border: #FCCBC9;
+
+  --p2: #7DB87A;        /* Sage green — follicular */
+  --p2-soft: #A8D4A6;
+  --p2bg: #F0F8EF;
+  --p2border: #C8E8C6;
+
+  --p3: #F5A623;        /* Warm gold — ovulatory */
+  --p3-soft: #FAC96A;
+  --p3bg: #FFF8EC;
+  --p3border: #FAE0A8;
+
+  --p4: #9B7EC8;        /* Soft violet — luteal */
+  --p4-soft: #C4ABDE;
+  --p4bg: #F5F0FB;
+  --p4border: #DDD0F2;
+
+  --refeed: #4A9EDB;
+  --reedbg: #EEF6FF;
+  --reedborder: #BAD9F5;
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+}
+
+/* ── DARK THEME ─────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1C1218;
+    --surface: #261B22;
+    --surface2: #32242E;
+    --surface3: #3E2E38;
+    --border: #4A3542;
+    --border-soft: #3D2A37;
+    --text: #F5EDE8;
+    --text-soft: #C8B0A8;
+    --muted: #8A7070;
+    --shadow: 0 2px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+
+    --p1: #F07A75;
+    --p1-soft: #E84E48;
+    --p1bg: #2E1A1A;
+    --p1border: #5C2A2A;
+
+    --p2: #82C47F;
+    --p2-soft: #5AA857;
+    --p2bg: #192519;
+    --p2border: #2E4E2C;
+
+    --p3: #F5B840;
+    --p3-soft: #D49A20;
+    --p3bg: #26200F;
+    --p3border: #4A3A18;
+
+    --p4: #B494E0;
+    --p4-soft: #9070C0;
+    --p4bg: #211A30;
+    --p4border: #3E2E5C;
+
+    --refeed: #5AABF0;
+    --reedbg: #0F1E30;
+    --reedborder: #1A3A58;
+
+    --radius: 20px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent }
+html { background: var(--bg); min-height: 100% }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; padding-bottom: calc(100px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; scroll-behavior: smooth }
+
+/* ── NAV ─────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 100;
+  padding: 0 8px calc(4px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.06);
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 4px 6px; cursor: pointer; border: none; background: none;
+  color: var(--muted); font-size: 9px; font-family: 'DM Sans', sans-serif;
+  font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  transition: color 0.15s; position: relative;
+}
+.nav-btn.active { color: var(--text) }
+.nav-btn.active .nav-dot { opacity: 1; transform: scale(1) }
+.nav-icon { font-size: 20px; line-height: 1 }
+.nav-dot {
+  position: absolute; bottom: 2px; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--p3); opacity: 0; transform: scale(0); transition: all 0.2s;
+}
+
+/* ── SCREENS ─────────────────────────────────────────────────────── */
+.screen { display: none; padding: 0 }
+.screen.active { display: block }
+
+/* ── HEADER ──────────────────────────────────────────────────────── */
+.header {
+  padding: calc(54px + env(safe-area-inset-top)) 20px 20px;
+  background: linear-gradient(180deg, var(--surface2) 0%, transparent 100%);
+}
+.header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px }
+.header-title { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1.1; color: var(--text) }
+.header-sub { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5 }
+
+/* ── SETUP ───────────────────────────────────────────────────────── */
+.setup-card { margin: 0 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow) }
+.setup-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px }
+.setup-row:last-child { margin-bottom: 0 }
+.setup-label { font-size: 12px; color: var(--muted); font-weight: 600; min-width: 80px }
+.setup-input { flex: 1; font-size: 14px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; min-width: 0 }
+.setup-input[type=number] { width: 80px; flex: none; text-align: center }
+.gen-btn {
+  width: 100%; padding: 15px; background: var(--text); color: var(--bg);
+  border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px;
+  transition: opacity 0.15s; letter-spacing: 0.02em;
+}
+.gen-btn:active { opacity: 0.8 }
+
+/* ── PILL ────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 50px; letter-spacing: 0.03em;
+}
+.pill-p1 { background: var(--p1bg); color: var(--p1); border: 1px solid var(--p1border) }
+.pill-p2 { background: var(--p2bg); color: var(--p2); border: 1px solid var(--p2border) }
+.pill-p3 { background: var(--p3bg); color: var(--p3); border: 1px solid var(--p3border) }
+.pill-p4 { background: var(--p4bg); color: var(--p4); border: 1px solid var(--p4border) }
+.pill-rf { background: var(--reedbg); color: var(--refeed); border: 1px solid var(--reedborder) }
+
+/* ── TODAY HEADER ────────────────────────────────────────────────── */
+.today-hero {
+  margin: 0 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.today-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.today-hero.ph1::before { background: linear-gradient(90deg, var(--p1), var(--p1-soft)) }
+.today-hero.ph2::before { background: linear-gradient(90deg, var(--p2), var(--p2-soft)) }
+.today-hero.ph3::before { background: linear-gradient(90deg, var(--p3), var(--p3-soft)) }
+.today-hero.ph4::before { background: linear-gradient(90deg, var(--p4), var(--p4-soft)) }
+
+.hero-top { display: flex; align-items: center; gap: 16px; margin-bottom: 14px }
+.hero-ring { flex-shrink: 0 }
+.hero-ring svg { display: block }
+.hero-info { flex: 1 }
+.hero-greeting { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px }
+.hero-phase { font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1.1 }
+.hero-date { font-size: 12px; color: var(--muted); margin-top: 3px }
+.hero-cal-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 50px; padding: 6px 12px; font-size: 12px; font-weight: 600;
+}
+.hero-note {
+  font-size: 12px; color: var(--text-soft); line-height: 1.6;
+  background: var(--surface2); border-radius: var(--radius-sm);
+  padding: 10px 12px; margin-top: 12px;
+}
+
+/* ── RESET STATUS ────────────────────────────────────────────────── */
+#reset-status {
+  margin: 0 16px 10px;
+  background: var(--p4bg); border: 1px solid var(--p4border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: 12px; color: var(--p4); line-height: 1.5;
+}
+
+/* ── MEAL CARDS ──────────────────────────────────────────────────── */
+.meal-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px;
+  overflow: hidden; box-shadow: var(--shadow);
+}
+.meal-card-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px; cursor: pointer; user-select: none;
+}
+.meal-card-hdr:active { background: var(--surface2) }
+.meal-card-icon {
+  width: 42px; height: 42px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; background: var(--surface2);
+}
+.meal-card-info { flex: 1; min-width: 0 }
+.meal-card-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3 }
+.meal-card-sub { font-size: 11px; color: var(--muted); margin-top: 3px }
+.meal-card-arrow { font-size: 12px; color: var(--muted); transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); flex-shrink: 0 }
+.meal-card-arrow.open { transform: rotate(180deg) }
+.meal-card-body { display: none; border-top: 1px solid var(--border); padding: 16px }
+.meal-card-body.open { display: block }
+.ing-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--border-soft); font-size: 13px }
+.ing-row:last-child { border-bottom: none }
+.ing-name { color: var(--text); flex: 1; font-weight: 500 }
+.ing-qty { color: var(--muted); font-weight: 600; margin-left: 12px; white-space: nowrap; text-align: right; font-size: 12px }
+.ing-note { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; font-weight: 400 }
+.method-box {
+  background: var(--surface2); border-radius: var(--radius-sm);
+  padding: 12px 14px; margin-top: 12px; font-size: 12px;
+  color: var(--text-soft); line-height: 1.6; border-left: 3px solid var(--p3);
+}
+.method-label { font-size: 10px; font-weight: 700; color: var(--p3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px }
+
+/* ── ROUTINE TIMELINE ────────────────────────────────────────────── */
+.timeline-wrap { margin: 0 16px 12px }
+.timeline-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px }
+.timeline-title { font-size: 13px; font-weight: 700; color: var(--text) }
+.timeline-toggle { font-size: 11px; color: var(--muted); cursor: pointer; padding: 5px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: none; font-family: 'DM Sans', sans-serif; font-weight: 600 }
+.tblock { display: flex; align-items: stretch; border-radius: var(--radius-sm); margin-bottom: 4px; overflow: hidden; border: 1.5px solid transparent; transition: all 0.2s }
+.tblock.past { opacity: 0.3 }
+.tblock.current { border-color: var(--p3); background: var(--p3bg) }
+.tblock.future { background: var(--surface); border-color: var(--border) }
+.tblock-bar { width: 4px; flex-shrink: 0 }
+.tblock-time { width: 60px; padding: 10px 8px; flex-shrink: 0; border-right: 1px solid var(--border-soft) }
+.tblock-t { font-size: 10px; font-weight: 700; color: var(--text) }
+.tblock-d { font-size: 9px; color: var(--muted); margin-top: 2px }
+.tblock-body { padding: 10px 14px; flex: 1 }
+.tblock-title { font-size: 12px; font-weight: 700; color: var(--text) }
+.tblock-note { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4 }
+.now-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 8px }
+.now-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p3); flex-shrink: 0; box-shadow: 0 0 8px var(--p3) }
+.now-text { font-size: 12px; color: var(--p3); font-weight: 700 }
+
+/* ── CALENDAR ────────────────────────────────────────────────────── */
+.cal-wrap { padding: 0 16px }
+.cal-month-hdr { font-family: 'DM Serif Display', serif; font-size: 22px; margin: 20px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border) }
+.cal-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 4px }
+.cal-dow { font-size: 9px; font-weight: 700; color: var(--muted); text-align: center; padding: 4px 0; letter-spacing: 0.08em; text-transform: uppercase }
+.cal-day { border-radius: var(--radius-sm); padding: 7px 5px; min-height: 90px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s }
+.cal-day:active { opacity: 0.7 }
+.cal-day.today { border-color: var(--p3) !important; box-shadow: 0 0 0 2px var(--p3bg) }
+.cal-day.p1d { background: var(--p1bg); border-color: var(--p1border) }
+.cal-day.p2d { background: var(--p2bg); border-color: var(--p2border) }
+.cal-day.p3d { background: var(--p3bg); border-color: var(--p3border) }
+.cal-day.p4d { background: var(--p4bg); border-color: var(--p4border) }
+.cal-day.rfd { background: var(--reedbg); border-color: var(--reedborder) }
+.cal-dow-lbl { font-size: 8px; color: var(--muted); margin-bottom: 1px; font-weight: 600 }
+.cal-num { font-size: 13px; font-weight: 700; margin-bottom: 2px }
+.cal-cd { font-size: 8px; font-weight: 700; margin-bottom: 4px }
+.cal-meal { font-size: 8px; color: var(--muted); margin-bottom: 1px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.cal-meal b { font-weight: 700; color: var(--text) }
+.cal-prot { font-size: 8px; font-weight: 700; margin-top: 3px }
+
+/* ── DAILY MEALS TAB ─────────────────────────────────────────────── */
+.day-list { padding: 0 16px }
+.phase-hdr { margin: 24px 0 12px; display: flex; align-items: center; gap: 10px }
+.phase-hdr-name { font-family: 'DM Serif Display', serif; font-size: 22px }
+.phase-hdr-sub { font-size: 12px; color: var(--muted); margin-top: 2px }
+.day-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.day-card-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 12px }
+.day-card-date { font-size: 14px; font-weight: 700 }
+.day-card-macro { font-size: 11px; color: var(--muted); margin-left: auto; font-weight: 600 }
+.meal-row { display: grid; grid-template-columns: 75px 1fr; gap: 4px; margin-bottom: 8px; font-size: 12px }
+.meal-row:last-child { margin-bottom: 0 }
+.meal-lbl { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding-top: 1px }
+.meal-val { color: var(--text); font-weight: 600; line-height: 1.4 }
+.meal-note2 { color: var(--muted); font-size: 11px; margin-top: 3px; line-height: 1.4 }
+.rf-card {
+  background: var(--reedbg); border: 1.5px solid var(--reedborder);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
+}
+.rf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px }
+.rf-col-title { font-size: 11px; font-weight: 700; color: var(--refeed); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase }
+.rf-item { font-size: 11px; color: var(--text-soft); margin-bottom: 4px; line-height: 1.4 }
+
+/* ── GROCERY ─────────────────────────────────────────────────────── */
+.groc-wrap { padding: 0 16px }
+.groc-week {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.groc-week-hdr { padding: 16px; cursor: pointer }
+.groc-week-hdr:active { background: var(--surface2) }
+.groc-week-title { font-size: 15px; font-weight: 700; margin-bottom: 6px }
+.groc-week-sub { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px }
+.groc-section { padding: 14px 16px 8px; border-bottom: 1px solid var(--border-soft) }
+.groc-section:last-child { border-bottom: none; padding-bottom: 14px }
+.groc-cat { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px }
+.groc-item { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border-soft) }
+.groc-item:last-child { border-bottom: none }
+.groc-cb {
+  width: 22px; height: 22px; border: 2px solid var(--border);
+  border-radius: 8px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; background: var(--surface2);
+}
+.groc-cb.on { background: var(--p2); border-color: var(--p2) }
+.groc-cb.on::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 800 }
+.groc-name { font-size: 13px; flex: 1; font-weight: 500 }
+.groc-qty { font-size: 12px; color: var(--muted); white-space: nowrap; font-weight: 600 }
+
+/* ── GUIDE ───────────────────────────────────────────────────────── */
+.guide-wrap { padding: 0 16px }
+.guide-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.guide-hdr { padding: 18px; border-bottom: 1px solid var(--border) }
+.guide-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px }
+.guide-focus { font-size: 12px; font-weight: 600; margin-bottom: 4px }
+.guide-cal { font-size: 11px; color: var(--muted); font-weight: 500 }
+.guide-body { padding: 16px }
+.guide-row { display: grid; grid-template-columns: 95px 1fr; gap: 8px; margin-bottom: 10px; font-size: 12px }
+.guide-lbl { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding-top: 2px }
+.guide-val { line-height: 1.6; color: var(--text-soft) }
+.guide-note { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 12px; color: var(--text-soft); line-height: 1.6; margin-top: 6px }
+.meal-opt { background: var(--surface2); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 5px; font-size: 12px; line-height: 1.5 }
+.meal-opt:last-child { margin-bottom: 0 }
+
+/* ── ROUTINE ─────────────────────────────────────────────────────── */
+.routine-wrap { padding: 0 16px }
+.routine-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.routine-hdr { padding: 18px; border-bottom: 1px solid var(--border) }
+.routine-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px }
+.routine-days { font-size: 11px; color: var(--muted); font-weight: 600 }
+.routine-note { font-size: 12px; color: var(--text-soft); margin-top: 8px; line-height: 1.6 }
+.rblock { display: flex; align-items: stretch; border-bottom: 1px solid var(--border-soft) }
+.rblock:last-child { border-bottom: none }
+.rblock-bar { width: 4px; flex-shrink: 0 }
+.rblock-time { width: 60px; padding: 12px 8px; flex-shrink: 0; border-right: 1px solid var(--border-soft) }
+.rblock-t { font-size: 10px; font-weight: 700; color: var(--text) }
+.rblock-d { font-size: 9px; color: var(--muted); margin-top: 2px }
+.rblock-body { padding: 12px 14px; flex: 1 }
+.rblock-title { font-size: 13px; font-weight: 700 }
+.rblock-note { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4 }
+
+/* ── PREP ────────────────────────────────────────────────────────── */
+.prep-step {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.prep-step-hdr { display: flex; align-items: center; gap: 14px; padding: 16px; cursor: pointer }
+.prep-step-hdr:active { background: var(--surface2) }
+.prep-step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.prep-step-info { flex: 1; min-width: 0 }
+.prep-step-title { font-size: 14px; font-weight: 700; line-height: 1.3 }
+.prep-step-meta { font-size: 11px; color: var(--muted); margin-top: 3px }
+.prep-step-arrow { font-size: 12px; color: var(--muted); transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); flex-shrink: 0 }
+.prep-step-arrow.open { transform: rotate(180deg) }
+.prep-step-body { display: none; border-top: 1px solid var(--border); padding: 16px }
+.prep-step-body.open { display: block }
+.prep-ing-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--border-soft); font-size: 13px }
+.prep-ing-row:last-child { border-bottom: none }
+.prep-ing-name { color: var(--text); flex: 1; font-weight: 500 }
+.prep-ing-qty { color: var(--muted); font-weight: 700; margin-left: 12px; white-space: nowrap; font-size: 12px }
+.prep-method { margin-top: 14px }
+.prep-method-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px }
+.prep-method-step { display: flex; gap: 12px; margin-bottom: 10px; font-size: 12px; line-height: 1.6 }
+.prep-method-step:last-child { margin-bottom: 0 }
+.prep-method-num {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: var(--text-soft); flex-shrink: 0; margin-top: 1px;
+}
+.prep-method-text { color: var(--text-soft); flex: 1 }
+.prep-container-tag { display: inline-block; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-xs); padding: 4px 10px; font-size: 11px; color: var(--muted); margin-top: 10px; margin-right: 5px; font-weight: 600 }
+.prep-timer { display: inline-flex; align-items: center; gap: 4px; background: var(--p3bg); color: var(--p3); border-radius: var(--radius-xs); padding: 4px 10px; font-size: 11px; font-weight: 700; margin-left: 8px; border: 1px solid var(--p3border) }
+.prep-order-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--p3) }
+.prep-order-title { font-size: 12px; font-weight: 700; color: var(--p3); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase }
+.prep-order-item { font-size: 12px; color: var(--text-soft); margin-bottom: 5px; line-height: 1.5 }
+.prep-section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin: 18px 0 10px }
+
+/* ── SETTINGS ────────────────────────────────────────────────────── */
+.settings-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.settings-title { font-size: 16px; font-weight: 700; margin-bottom: 6px }
+.settings-desc { font-size: 13px; color: var(--text-soft); line-height: 1.6; margin-bottom: 16px }
+
+/* ── MEALS TAB — ingredient breakdown ────────────────────────────────── */
+.meal-section {
+  border-top: 1px solid var(--border-soft);
+  padding: 12px 0 4px;
+}
+.meal-section:first-of-type { border-top: none }
+.meal-section-hdr {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.meal-section-icon { font-size: 16px; flex-shrink: 0 }
+.meal-section-title {
+  font-size: 13px; font-weight: 700; color: var(--text); flex: 1;
+}
+.meal-section-time {
+  font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 4px;
+}
+.meal-section-total {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  background: var(--surface2); border-radius: 50px;
+  padding: 3px 10px; white-space: nowrap;
+}
+.meal-ing-row {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 8px; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid var(--border-soft);
+  font-size: 12px;
+}
+.meal-ing-row:last-child { border-bottom: none }
+.meal-ing-name { color: var(--text); font-weight: 500 }
+.meal-ing-qty { color: var(--text-soft); font-weight: 600; text-align: right; white-space: nowrap }
+.meal-ing-kcal { color: var(--muted); font-size: 11px; text-align: right; white-space: nowrap; min-width: 52px }
+
+
+.groc-week-hdr { display: flex; align-items: flex-start; gap: 10px; padding: 16px; cursor: pointer }
+.groc-week-hdr-inner { flex: 1 }
+.cal-month-sep { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 24px 0 12px; color: var(--text); padding-bottom: 10px; border-bottom: 1.5px solid var(--border) }
+
+/* ── GUIDE TAB PILLS ─────────────────────────────────────────────── */
+.guide-tab-bar { display: flex; gap: 8px; padding: 0 16px 16px; flex-wrap: wrap }
+.guide-tab-btn {
+  padding: 8px 16px; border-radius: 50px; font-size: 12px; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted);
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.guide-tab-btn.active { background: var(--text); color: var(--bg); border-color: var(--text) }
+
+
+/* ── CYCLE LOG ───────────────────────────────────────────────────────── */
+.log-strip {
+  margin: 0 16px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.log-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px }
+.log-btns { display: flex; gap: 8px; margin-bottom: 12px }
+.log-btn {
+  flex: 1; padding: 10px 8px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-align: center; transition: all 0.15s; color: var(--text);
+}
+.log-btn:active { transform: scale(0.96) }
+.log-btn.period { border-color: var(--p1); background: var(--p1bg); color: var(--p1) }
+.log-btn.spotting { border-color: var(--p3); background: var(--p3bg); color: var(--p3) }
+.log-btn.good { border-color: var(--p2); background: var(--p2bg); color: var(--p2) }
+.log-dots { display: flex; gap: 4px; align-items: center }
+.log-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px }
+.log-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border) }
+.log-dot.period { background: var(--p1) }
+.log-dot.spotting { background: var(--p3) }
+.log-dot.good { background: var(--p2) }
+.log-dot-date { font-size: 8px; color: var(--muted); font-weight: 600 }
+.cycle-conflict-banner {
+  margin: 0 16px 14px;
+  background: var(--p1bg); border: 1.5px solid var(--p1border);
+  border-radius: var(--radius); padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.conflict-title { font-size: 13px; font-weight: 700; color: var(--p1); margin-bottom: 6px }
+.conflict-body { font-size: 12px; color: var(--text-soft); line-height: 1.6 }
+.next-period-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--p4bg); border: 1px solid var(--p4border);
+  border-radius: 50px; padding: 5px 12px; font-size: 11px; font-weight: 600; color: var(--p4);
+  margin-top: 10px;
+}
+/* Cycle history */
+.cycle-hist-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-soft); font-size: 13px }
+.cycle-hist-row:last-child { border-bottom: none }
+.cycle-hist-num { font-weight: 700; color: var(--text) }
+.cycle-hist-date { color: var(--muted); font-size: 12px }
+.cycle-hist-len { font-size: 12px; font-weight: 700; color: var(--p2) }
+</style>
+</head>
+<body>
+<main role="main" style="display:contents">
+
+<div id="s-today" class="screen active">
+  <div style="padding:calc(54px + env(safe-area-inset-top)) 16px 16px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px" id="hdr-eyebrow">Good morning</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:30px;line-height:1.1;color:var(--text)" id="hdr-greeting">Jennifer</div>
+  </div>
+  <div class="setup-card" id="setup-card" style="margin-top:0">
+    <div class="setup-row">
+      <span class="setup-label">Cycle day</span>
+      <input type="number" class="setup-input" id="cd" min="1" max="32" value="25" inputmode="numeric" aria-label="Cycle day number"/>
+    </div>
+    <button class="gen-btn" onclick="gen()">Generate my plan</button>
+  </div>
+  <div id="today-content" style="display:none">
+    <div id="reset-status" style="display:none;margin:0 16px 12px"></div>
+    <div id="today-banner"></div>
+    <div id="log-strip" class="log-strip" style="display:none">
+      <div class="log-label">How are you today?</div>
+      <div class="log-btns">
+        <button class="log-btn period" onclick="logDay('period')">🩸 Period</button>
+        <button class="log-btn spotting" onclick="logDay('spotting')">🔴 Spotting</button>
+        <button class="log-btn good" onclick="logDay('good')">✅ All good</button>
+      </div>
+      <div class="log-dots" id="log-dots"></div>
+    </div>
+    <div id="conflict-banner" style="display:none" class="cycle-conflict-banner">
+      <div class="conflict-title">🩸 Period started — phase updated</div>
+      <div class="conflict-body" id="conflict-body"></div>
+    </div>
+    <div style="padding:0 16px;margin-bottom:12px" id="meal-cards-wrap"></div>
+    <div class="timeline-wrap" id="timeline-wrap"></div>
+  </div>
+</div>
+
+<div id="s-cal" class="screen">
+  <div class="header">
+    <div class="header-eyebrow">31-day view</div>
+    <div class="header-title">Calendar</div>
+  </div>
+  <div class="cal-wrap" id="cal-wrap"></div>
+</div>
+
+<div id="s-meals" class="screen">
+  <div class="header">
+    <div class="header-eyebrow">Daily breakdown</div>
+    <div class="header-title">Meals</div>
+  </div>
+  <div class="day-list" id="meals-list"></div>
+</div>
+
+<div id="s-groc" class="screen">
+  <div class="header">
+    <div class="header-eyebrow">Shop Saturday</div>
+    <div class="header-title">Groceries</div>
+    <div class="header-sub">Phase-accurate quantities per week</div>
+  </div>
+  <div class="groc-wrap" id="groc-wrap"></div>
+</div>
+
+<div id="s-more" class="screen">
+  <div class="header">
+    <div class="header-eyebrow">Reference</div>
+    <div class="header-title">Guide</div>
+  </div>
+  <div class="guide-tab-bar" id="guide-tab-bar">
+    <button class="guide-tab-btn active" id="guide-tab-phases" onclick="showGuide('phases')">Phase guide</button>
+    <button class="guide-tab-btn" id="guide-tab-routine" onclick="showGuide('routine')">Routine</button>
+    <button class="guide-tab-btn" id="guide-tab-history" onclick="showGuide('history')">📅 My cycles</button>
+    <button class="guide-tab-btn" id="guide-tab-settings" onclick="showGuide('settings')">⚙ Settings</button>
+  </div>
+  <div id="guide-phases" class="guide-wrap"></div>
+  <div id="guide-routine" class="routine-wrap" style="display:none"></div>
+  <div id="guide-history" style="display:none;padding:0 16px"></div>
+  <div id="guide-settings" style="display:none;padding:0 16px">
+    <div class="settings-card">
+      <div class="settings-title">Update cycle day</div>
+      <div class="settings-desc">Enter what day of your cycle you are on today and the app will recalculate everything from scratch.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="font-size:13px;color:var(--muted);font-weight:500">I am on cycle day</span>
+        <input type="number" id="reset-day-input" min="1" max="31" value="1" style="width:72px;font-size:17px;padding:9px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;text-align:center;font-weight:700" inputmode="numeric" aria-label="Cycle day"/>
+        <span style="font-size:13px;color:var(--muted);font-weight:500">of 31</span>
+      </div>
+      <button class="gen-btn" onclick="resetCycleToDay()">✨ Recalculate everything</button>
+    </div>
+    <div class="settings-card">
+      <div class="settings-title">My period started today</div>
+      <div class="settings-desc">Sets today as Day 1. This week's meals stay exactly as planned — your new cycle phases begin from next Sunday.</div>
+      <div id="reset-status-settings" style="display:none;margin-bottom:14px;background:var(--p4bg);border:1px solid var(--p4border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--p4);line-height:1.4"></div>
+      <button class="gen-btn" style="background:var(--p1bg);color:var(--p1);border:1.5px solid var(--p1border)" onclick="resetCycle()">🌸 Period started — set Day 1</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="s-prep" class="screen">
+  <div class="header">
+    <div class="header-eyebrow">Sunday meal prep</div>
+    <div class="header-title">Prep guide</div>
+    <div class="header-sub" id="prep-sub">Full week recipe and method</div>
+  </div>
+  <div id="prep-content" style="padding:0 16px"></div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showScreen('today',this)" aria-label="Today">
+    <span class="nav-icon">🌸</span>Today<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('cal',this)" aria-label="Calendar">
+    <span class="nav-icon">🗓</span>Calendar<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('meals',this)" aria-label="Meals">
+    <span class="nav-icon">🥗</span>Meals<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('groc',this)" aria-label="Shop">
+    <span class="nav-icon">🛒</span>Shop<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('prep',this)" aria-label="Prep guide">
+    <span class="nav-icon">🍳</span>Prep<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('more',this)" aria-label="Guide">
+    <span class="nav-icon">✨</span>Guide<div class="nav-dot"></div>
+  </button>
+</nav>
+
+<script>
+const CL=31,SHOW=122;
+
+const BOWL_BASE=[
+  {name:'Full-fat Greek yoghurt organic',qty:'200g'},
+  {name:'Chia seeds',qty:'12g'},
+  {name:'Walnuts raw',qty:'15g'},
+  {name:'Raw honey',qty:'5g (1 tsp)'},
+  {name:'Coconut flakes unsweetened',qty:'5g'},
+];
+
+const PH={
+  1:{name:'Menstrual',days:[1,5],color:'var(--p1)',cal:1500,cls:'p1d',pillcls:'pill-p1',
+    bowl_base:BOWL_BASE,
+    bowl_adds:[
+      {name:'Ground flaxseed',qty:'10g',note:'Oestrogen clearance'},
+      {name:'Pumpkin seeds',qty:'10g',note:'Magnesium for cramps'},
+      {name:'Banana — room temp, sliced',qty:'50g',note:'B6 reduces period pain'},
+    ],
+    bowl_method:'Take yoghurt out of fridge 10 min early — serve room temp. No cold berries this phase. Layer base, stir in flaxseed, top with banana and seeds.',
+    bowl_cal:552,bowl_p:30,
+    focus:'Iron · anti-cramp · warm foods · no cold raw veg',
+    note:'Do not restrict. Turmeric + ginger every meal. Warm foods only. Target 1,500 kcal.'},
+  2:{name:'Follicular',days:[6,13],color:'var(--p2)',cal:1300,cls:'p2d',pillcls:'pill-p2',
+    bowl_base:BOWL_BASE,
+    bowl_adds:[
+      {name:'Blueberries organic',qty:'60g',note:'High antioxidant, low GI'},
+      {name:'Ground flaxseed',qty:'10g',note:'Seed cycling — modulates rising oestrogen'},
+      {name:'Pumpkin seeds',qty:'10g',note:'Seed cycling — zinc for follicle development'},
+    ],
+    bowl_method:'Prepare in glass jar the night before — grab and go. Cold berries fine this phase.',
+    bowl_cal:542,bowl_p:30,
+    focus:'Fresh + light · oestrogen clearance · best fat-burning phase',
+    note:'Target 1,300 kcal. Best fat burning phase — push harder in training. Cold lunches fine.'},
+  3:{name:'Ovulatory',days:[14,17],color:'var(--p3)',cal:1300,cls:'p3d',pillcls:'pill-p3',
+    bowl_base:BOWL_BASE,
+    bowl_adds:[
+      {name:'Sunflower seeds',qty:'10g',note:'Seed cycling — vitamin E + selenium for liver'},
+      {name:'Sesame seeds',qty:'5g',note:'Seed cycling — lignans + zinc'},
+      {name:'Mixed berries',qty:'60g',note:'Ellagic acid for oestrogen clearance'},
+      {name:'Moringa powder',qty:'5g',note:'Antioxidant peaks benefit at oestrogen peak'},
+    ],
+    bowl_method:'Moringa stirred into yoghurt first, then berries and seeds on top.',
+    bowl_cal:532,bowl_p:30,
+    focus:'Cruciferous veg every meal · liver detox · DIM + sulforaphane',
+    note:'Target 1,300 kcal. Oestrogen peaks. Broccoli every meal. Never cook broccoli sprouts.'},
+  4:{name:'Luteal',days:[18,31],color:'var(--p4)',cal:1500,cls:'p4d',pillcls:'pill-p4',
+    bowl_base:BOWL_BASE,
+    bowl_adds:[
+      {name:'Mango fresh',qty:'60g',note:'B6 reduces PMS, hits carb craving'},
+      {name:'Almond butter — no additives',qty:'10g',note:'Magnesium + fat — kills afternoon cravings'},
+      {name:'Dark chocolate 85%+ grated',qty:'8g',note:'Magnesium first thing kills choc cravings all day'},
+      {name:'Sunflower seeds',qty:'10g',note:'Seed cycling — progesterone support'},
+    ],
+    bowl_method:'Grate dark chocolate directly over the bowl last. Almond butter stirred into yoghurt before topping.',
+    bowl_cal:602,bowl_p:30,
+    focus:'Complex carbs · magnesium-rich · craving-proof · filling',
+    note:'Target 1,500 kcal. Feed cravings with whole food carbs. Magnesium every meal.'},
+};
+
+const PLAN31=[
+  {cd:1,ph:1,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:180,pR:240,carb:'Brown rice',cC:80,cR:29,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:160,pR:213,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:4}},
+  {cd:2,ph:1,L:{p:'Salmon fillet',pKey:'salmon',pC:140,pR:165,carb:'Brown rice',cC:80,cR:29,veg:'Spinach',vC:'40g',oil:5},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Brown rice',cC:80,cR:29,veg:'Broccolini',vC:'80g',oil:9}},
+  {cd:3,ph:1,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:180,pR:240,carb:'Sweet potato',cC:100,cR:114,veg:'Spinach',vC:'40g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:160,pR:213,carb:'Brown rice',cC:80,cR:29,veg:'Broccolini',vC:'80g',oil:3}},
+  {cd:4,ph:1,L:{p:'Salmon fillet',pKey:'salmon',pC:140,pR:165,carb:'Sweet potato',cC:100,cR:114,veg:'Spinach',vC:'40g',oil:5},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Brown rice',cC:80,cR:29,veg:'Kale',vC:'60g',oil:12}},
+  {cd:5,ph:1,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:180,pR:240,carb:'Brown rice',cC:80,cR:29,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:160,pR:213,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:4}},
+  {cd:6,ph:2,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Cucumber + Avocado',vC:'60g cucumber · 35g avocado',oil:3},D:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli',vC:'100g',oil:3}},
+  {cd:7,ph:2,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:145,pR:193,carb:'Brown rice',cC:55,cR:20,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Sweet potato',cC:80,cR:91,veg:'Broccolini',vC:'80g',oil:9}},
+  {cd:8,ph:2,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Avocado + Cucumber',vC:'35g avocado · 60g cucumber',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Brown rice',cC:55,cR:20,veg:'Broccolini',vC:'80g',oil:5}},
+  {cd:9,ph:2,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Brown rice',cC:55,cR:20,veg:'Kale',vC:'60g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:140,pR:187,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli',vC:'100g',oil:3}},
+  {cd:10,ph:2,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Cucumber + Avocado',vC:'60g cucumber · 35g avocado',oil:3},D:{p:'Salmon fillet',pKey:'salmon',pC:120,pR:141,carb:'Brown rice',cC:55,cR:20,veg:'Kale',vC:'60g',oil:3}},
+  {cd:11,ph:2,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Cucumber + Avocado',vC:'60g cucumber · 35g avocado',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:130,pR:153,carb:'Quinoa',cC:50,cR:17,veg:'Broccolini',vC:'80g',oil:7}},
+  {cd:12,ph:2,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Brown rice',cC:55,cR:20,veg:'Kale',vC:'60g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:140,pR:187,carb:'Brown rice',cC:55,cR:20,veg:'Broccoli',vC:'100g',oil:3}},
+  {cd:13,ph:2,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Avocado + Cucumber',vC:'35g avocado · 60g cucumber',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Sweet potato',cC:80,cR:91,veg:'Broccolini',vC:'80g',oil:4}},
+  {cd:14,ph:3,L:{p:'Salmon fillet',pKey:'salmon',pC:120,pR:141,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli sprouts',vC:'30g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:140,pR:187,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli',vC:'100g',oil:3}},
+  {cd:15,ph:3,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:145,pR:193,carb:'Brown rice',cC:55,cR:20,veg:'Broccoli',vC:'100g',oil:3},D:{p:'Salmon fillet',pKey:'salmon',pC:120,pR:141,carb:'Quinoa',cC:45,cR:15,veg:'Cauliflower + Bok choy',vC:'100g cauliflower · 80g bok choy',oil:3}},
+  {cd:16,ph:3,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:165,pR:220,carb:'Quinoa',cC:50,cR:17,veg:'Bok choy',vC:'80g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:130,pR:153,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli',vC:'100g',oil:10}},
+  {cd:17,ph:3,L:{p:'Salmon fillet',pKey:'salmon',pC:120,pR:141,carb:'Quinoa',cC:50,cR:17,veg:'Broccoli sprouts',vC:'30g',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Brown rice',cC:55,cR:20,veg:'Broccoli',vC:'100g',oil:11}},
+  {cd:18,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Sweet potato',cC:100,cR:114,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:160,pR:213,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:4}},
+  {cd:19,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Sweet potato',cC:100,cR:114,veg:'Spinach',vC:'40g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Quinoa',cC:70,cR:23,veg:'Broccolini',vC:'80g',oil:13}},
+  {cd:20,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Brown rice',cC:70,cR:25,veg:'Spinach + Avocado',vC:'40g spinach · 50g avocado',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Sweet potato',cC:100,cR:114,veg:'Broccolini',vC:'80g',oil:10}},
+  {cd:21,ph:4,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:180,pR:240,carb:'Quinoa',cC:70,cR:23,veg:'Spinach',vC:'40g',oil:3},D:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:3}},
+  {cd:22,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Sweet potato',cC:100,cR:114,veg:'Spinach',vC:'40g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Brown rice',cC:70,cR:25,veg:'Broccolini',vC:'80g',oil:14}},
+  {cd:23,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Brown rice',cC:70,cR:25,veg:'Spinach + Avocado',vC:'40g spinach · 50g avocado',oil:3},D:{p:'Sirloin steak',pKey:'sirloin_steak',pC:160,pR:213,carb:'Quinoa',cC:70,cR:23,veg:'Spinach',vC:'40g',oil:6}},
+  {cd:24,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Quinoa',cC:70,cR:23,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:11}},
+  {cd:25,ph:4,L:{p:'Grass-fed beef mince',pKey:'beef_mince',pC:180,pR:240,carb:'Brown rice',cC:70,cR:25,veg:'Spinach',vC:'40g',oil:3},D:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Quinoa',cC:70,cR:23,veg:'Broccolini',vC:'80g',oil:3}},
+  {cd:26,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Sweet potato',cC:100,cR:114,veg:'Spinach',vC:'40g',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Brown rice',cC:70,cR:25,veg:'Broccolini',vC:'80g',oil:9}},
+  {cd:27,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Quinoa',cC:70,cR:23,veg:'Spinach + Avocado',vC:'40g spinach · 50g avocado',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Sweet potato',cC:100,cR:114,veg:'Kale',vC:'60g',oil:14}},
+  {cd:28,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Brown rice',cC:70,cR:25,veg:'Spinach',vC:'40g',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Quinoa',cC:70,cR:23,veg:'Broccolini',vC:'80g',oil:9}},
+  {cd:29,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Sweet potato',cC:100,cR:114,veg:'Broccolini',vC:'80g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Brown rice',cC:70,cR:25,veg:'Kale',vC:'60g',oil:15}},
+  {cd:30,ph:4,L:{p:'Chicken thigh',pKey:'chicken_thigh',pC:200,pR:267,carb:'Quinoa',cC:70,cR:23,veg:'Spinach + Avocado',vC:'40g spinach · 50g avocado',oil:3},D:{p:'Chicken breast',pKey:'chicken_breast',pC:110,pR:147,carb:'Sweet potato',cC:100,cR:114,veg:'Broccolini',vC:'80g',oil:8}},
+  {cd:31,ph:4,L:{p:'Salmon fillet',pKey:'salmon',pC:130,pR:153,carb:'Brown rice',cC:70,cR:25,veg:'Spinach',vC:'40g',oil:3},D:{p:'Barramundi fillet',pKey:'barramundi',pC:140,pR:165,carb:'Quinoa',cC:70,cR:23,veg:'Kale',vC:'60g',oil:14}},
+];
+
+
+// Cooking methods per protein
+const COOK_METHOD={
+  'beef_mince':'Cast iron, olive oil + turmeric + cumin + garlic. Batch cook Sunday. Store cold.',
+  'chicken_thigh':'Poach Sunday — water + garlic + salt, 25 min, shred, store cold in glass container.',
+  'salmon':'Batch bake Sunday — baking paper, 180°C, 15–18 min. Store cold.',
+  'sirloin_steak':'Cast iron screaming hot. Olive oil + garlic + rosemary. 3 min each side medium rare. Rest 3 min.',
+  'chicken_breast':'Pan-sear cast iron, olive oil + garlic. 6–7 min each side. Cook fresh nightly.',
+  'barramundi':'Pan-sear or oven. Baking paper, 180°C, 15–18 min. Olive oil + lemon.',
+};
+
+// Raw/cooked weight reference
+const YIELDS={
+  'beef_mince':0.75,'sirloin_steak':0.75,'chicken_thigh':0.75,
+  'chicken_breast':0.75,'salmon':0.85,'barramundi':0.85,
+  'Brown rice':2.8,'Quinoa':3.0,'Sweet potato':0.88,
+};
+
+
+const RS=['Grass-fed eye fillet or scotch fillet 200–250g','Roasted veg or garden salad','Sweet potato or regular potato','No creamy sauces — olive oil + lemon','1,800–2,000 kcal target'];
+const RT=['Tom yum or larb — broth-based','Grilled chicken, prawns or fish','Jasmine rice 1 serve','Fresh herb salads or stir-fries','No heavy coconut cream curries','1,800–2,000 kcal target'];
+
+function gph(d){const n=((d-1)%CL)+1;if(n<=5)return 1;if(n<=13)return 2;if(n<=17)return 3;return 4;}
+function isSat(d){return d.getDay()===6;}
+function addD(s,n){const d=new Date(s);d.setDate(d.getDate()+n);return d;}
+function fmtD(d){return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});}
+function fmtDow(d){return d.toLocaleDateString('en-AU',{weekday:'short'});}
+
+let plan=[];
+
+// Get today's real date from device
+function getTodayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))+'-'+(String(d.getDate()).padStart(2,'0'));
+}
+
+function updateGreeting(){
+  const hr=new Date().getHours();
+  let g='Good morning, Jennifer 🌸';
+  if(hr>=12&&hr<17)g='Good afternoon, Jennifer 🌸';
+  else if(hr>=17)g='Good evening, Jennifer 🌸';
+  document.getElementById('hdr-eyebrow').textContent=g;
+  const today=new Date();
+  document.getElementById('hdr-greeting').textContent=today.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
+  const hd=document.getElementById('hero-date-display');
+  if(hd)hd.textContent=today.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
+}
+
+// ANCHOR SYSTEM — supports resetting cycle day 1 mid-week
+// Default anchor: 11 June 2026 = Day 25
+const DEFAULT_ANCHOR_DATE='2026-06-11';
+const DEFAULT_ANCHOR_DAY=25;
+
+function getAnchor(){
+  try{
+    const stored=localStorage.getItem('cycleAnchor');
+    if(stored){ try{return JSON.parse(stored);}catch(e){} }
+  }catch(e){}
+  return {date:DEFAULT_ANCHOR_DATE,day:DEFAULT_ANCHOR_DAY,effectiveFrom:null};
+}
+
+function saveAnchor(a){
+  try{ localStorage.setItem('cycleAnchor',JSON.stringify(a)); }catch(e){}
+}
+
+function cycleDayForDate(date,anchor){
+  const a=new Date(anchor.date);
+  a.setHours(0,0,0,0);
+  const d=new Date(date);
+  d.setHours(0,0,0,0);
+  const diff=Math.round((d-a)/(1000*60*60*24));
+  let cd=((anchor.day+diff-1)%CL)+1;
+  if(cd<=0)cd+=CL;
+  return cd;
+}
+
+// Get the Sunday on/before a given date
+function sundayOnOrBefore(date){
+  const d=new Date(date);
+  const dow=d.getDay();
+  d.setDate(d.getDate()-dow);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function gen(){
+  const sd=getTodayStr();
+  const today=new Date(sd);
+  today.setHours(0,0,0,0);
+
+  const oldAnchor=getAnchor();
+  const pendingAnchor=oldAnchor.pending||null;
+
+  const thisWeekSunday=sundayOnOrBefore(today);
+  const nextWeekSunday=new Date(thisWeekSunday);
+  nextWeekSunday.setDate(nextWeekSunday.getDate()+7);
+
+  plan=[];
+  for(let i=0;i<SHOW;i++){
+    const date=addD(sd,i);
+    date.setHours(0,0,0,0);
+
+    let activeAnchor=oldAnchor;
+    if(pendingAnchor && date>=nextWeekSunday) activeAnchor=pendingAnchor;
+
+    const cd=cycleDayForDate(date,activeAnchor);
+    const ph=gph(cd);
+    const phase=PH[ph];
+    const isR=isSat(date);
+    // Get meal from PLAN31 using cycle day (1-31)
+    const mealDay=PLAN31.find(d=>d.cd===cd)||PLAN31[0];
+    let lp=0,dp=0,tp=0;
+    if(!isR){
+      // Protein grams × per-100g protein content
+      const PROT100={beef_mince:26,sirloin_steak:26,chicken_thigh:26,chicken_breast:31,salmon:25,barramundi:26};
+      lp=Math.round(PROT100[mealDay.L.pKey]*mealDay.L.pC/100);
+      dp=Math.round(PROT100[mealDay.D.pKey]*mealDay.D.pC/100);
+      tp=phase.bowl_p+lp+dp;
+    }
+    plan.push({date,cd,ph,phase,isR,mealDay,lp,dp,tp});
+  }
+
+  if(pendingAnchor && today>=nextWeekSunday){
+    saveAnchor({date:pendingAnchor.date,day:pendingAnchor.day,pending:null});
+  }
+
+  buildToday();buildCal();buildMeals();buildGroc();buildGuide();buildRoutine();buildPrep();
+  document.getElementById('setup-card').style.display='none';
+  document.getElementById('today-content').style.display='block';
+  updateResetStatus();
+}
+
+function resetCycle(){
+  const ok=confirm("Reset your cycle? Today will become Day 1.\\n\\nThis week's meals (already planned) stay the same. The new cycle starts calculating from next Sunday.");
+  if(!ok)return;
+
+  const sd=getTodayStr();
+  const today=new Date(sd);
+  today.setHours(0,0,0,0);
+
+  const oldAnchor=getAnchor();
+  const thisWeekSunday=sundayOnOrBefore(today);
+  const nextWeekSunday=new Date(thisWeekSunday);
+  nextWeekSunday.setDate(nextWeekSunday.getDate()+7);
+  const nextSundayStr=nextWeekSunday.getFullYear()+'-'+(String(nextWeekSunday.getMonth()+1).padStart(2,'0'))+'-'+(String(nextWeekSunday.getDate()).padStart(2,'0'));
+
+  // New cycle: Day 1 = today, but it only becomes the active anchor from next Sunday onward
+  // Day on next Sunday = however many days from today to next Sunday + 1
+  const daysToNextSunday=Math.round((nextWeekSunday-today)/(1000*60*60*24));
+  const dayOnNextSunday=daysToNextSunday+1; // since today=Day1
+
+  saveAnchor({
+    date:oldAnchor.date,
+    day:oldAnchor.day,
+    pending:{date:nextSundayStr,day:dayOnNextSunday}
+  });
+
+  gen();
+  alert("Done. Today is Day 1. This week's meals are unchanged — your new cycle phases begin "+nextWeekSunday.toLocaleDateString('en-AU',{day:'numeric',month:'long'})+".");
+}
+
+function resetCycleToDay(){
+  const dayInput=parseInt(document.getElementById('reset-day-input').value);
+  if(!dayInput||dayInput<1||dayInput>31){
+    alert('Please enter a valid cycle day between 1 and 31.');
+    return;
+  }
+  const sd=getTodayStr();
+  saveAnchor({date:sd,day:dayInput,pending:null});
+  gen();
+  showGuide('settings');
+  alert('Done. Today is now Day '+dayInput+'. Everything has been recalculated.');
+}
+
+function updateResetStatus(){
+  const anchor=getAnchor();
+  const el=document.getElementById('reset-status');
+  const elSettings=document.getElementById('reset-status-settings');
+  let msg='';
+  let show=false;
+  if(anchor.pending){
+    const d=new Date(anchor.pending.date);
+    msg=`Reset scheduled — new cycle (Day 1) takes effect from ${d.toLocaleDateString('en-AU',{day:'numeric',month:'long'})}`;
+    show=true;
+  }
+  if(el){el.textContent=msg;el.style.display=show?'block':'none';}
+  if(elSettings){elSettings.textContent=msg;elSettings.style.display=show?'block':'none';}
+}
+
+
+
+function buildToday(){
+  const today=plan[0];
+  const ph=today.phase;
+  const phNum=today.ph;
+  const phColors=['','var(--p1)','var(--p2)','var(--p3)','var(--p4)'];
+  const phColor=phColors[phNum];
+  const phClass=['','ph1','ph2','ph3','ph4'][phNum];
+
+  // Update greeting
+  updateGreeting();
+
+  // Phase progress ring SVG
+  const cd=today.cd; // cycle day 1-31
+  const totalDays=CL;
+  const pct=cd/totalDays;
+  const r=30; const stroke=5; const cx=38; const cy=38;
+  const circumference=2*Math.PI*r;
+  const dash=circumference*pct;
+  const ringColor=phColor;
+  const ringSVG=`<svg width="76" height="76" viewBox="0 0 76 76">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${stroke}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${ringColor}" stroke-width="${stroke}"
+      stroke-dasharray="${dash.toFixed(1)} ${circumference.toFixed(1)}"
+      stroke-dashoffset="${(circumference/4).toFixed(1)}"
+      stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="currentColor">${cd}</text>
+    <text x="${cx}" y="${cy+10}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="var(--muted)" font-weight="600">of ${totalDays}</text>
+  </svg>`;
+
+  // Phase days range
+  const phDayRanges=['','Days 1–5','Days 6–13','Days 14–17','Days 18–31'];
+
+  // Hero banner
+  const banner=document.getElementById('today-banner');
+  banner.innerHTML=`<div class="today-hero ${phClass}" style="margin:0 16px 14px">
+    <div class="hero-top">
+      <div class="hero-ring">${ringSVG}</div>
+      <div class="hero-info">
+        <div class="hero-greeting">Cycle day ${cd} · ${phDayRanges[phNum]}</div>
+        <div class="hero-phase" style="color:${phColor}">${ph.name}</div>
+        <div class="hero-date" id="hero-date-display"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="hero-cal-badge">🔥 ${ph.cal} kcal today</span>
+      <span class="hero-cal-badge" style="color:${phColor}">💪 ~${today.tp}g protein</span>
+    </div>
+    <div class="hero-note">${ph.note}</div>
+  </div>`;
+
+  // Meal cards
+  const wrap=document.getElementById('meal-cards-wrap');
+  if(today.isR){
+    wrap.innerHTML=`<div style="background:var(--reedbg);border:1.5px solid var(--reedborder);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)">
+      <div style="font-size:15px;font-weight:700;color:var(--refeed);margin-bottom:6px">🍽️ Refeed day</div>
+      <div style="font-size:13px;color:var(--text-soft);line-height:1.5;margin-bottom:14px">Yoghurt bowl as normal, then eat out for lunch and dinner. You've earned it.</div>
+      <div class="rf-grid">
+        <div><div class="rf-col-title">🥩 Steak</div>${RS.map(s=>`<div class="rf-item">· ${s}</div>`).join('')}</div>
+        <div><div class="rf-col-title">🍜 Thai</div>${RT.map(s=>`<div class="rf-item">· ${s}</div>`).join('')}</div>
+      </div>
+    </div>`;
+    buildMealCard('bowl-card',ph,'bowl',null,null);
+  } else {
+    wrap.innerHTML='';
+    buildMealCard('bowl-card',ph,'bowl',null,null);
+    buildMealCard('lunch-card',ph,'lunch',today.mealDay,today.lp);
+    buildMealCard('dinner-card',ph,'dinner',today.mealDay,today.dp);
+  }
+
+  // Routine timeline
+  buildTimeline(today.date);
+  // Log strip and conflict banner
+  buildLogStrip();
+  updateConflictBanner();
+}
+
+function buildMealCard(id,ph,type,meal,prot){
+  const wrap=document.getElementById('meal-cards-wrap');
+  const div=document.createElement('div');
+  div.className='meal-card';
+  div.id=id;
+
+  let icon,title,sub,bodyHTML;
+
+  if(type==='bowl'){
+    icon='🥣';
+    title='Yoghurt bowl';
+    sub=`8:00am · ~${ph.bowl_p}g protein`;
+    const allIngs=[...ph.bowl_base,...ph.bowl_adds];
+    bodyHTML=`
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Base — every phase</div>
+      ${ph.bowl_base.map(i=>`<div class="ing-row"><span class="ing-name">${i.name}</span><span class="ing-qty">${i.qty}</span></div>`).join('')}
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin:12px 0 10px">Add this phase</div>
+      ${ph.bowl_adds.map(i=>`<div class="ing-row"><div><span class="ing-name">${i.name}</span>${i.note?`<div class="ing-note">${i.note}</div>`:''}</div><span class="ing-qty">${i.qty}</span></div>`).join('')}
+      <div class="method-box"><div class="method-label">Method</div>${ph.bowl_method}</div>`;
+  } else if(type==='lunch'){
+    icon='🥗';
+    const L=meal.L;
+    title=`${L.pC}g ${L.p} · ${L.cC}g ${L.carb} · ${L.veg}`;
+    sub=`11:30am · ~${prot}g protein · cold · glass container`;
+    bodyHTML=`
+      <div class="ing-row"><div><span class="ing-name">${L.p}</span><div class="ing-note">${COOK_METHOD[L.pKey]||''}</div></div><span class="ing-qty">${L.pC}g cooked<br><span style="color:var(--muted);font-size:10px">buy ${L.pR}g raw</span></span></div>
+      <div class="ing-row"><span class="ing-name">${L.carb}</span><span class="ing-qty">${L.cC}g cooked<br><span style="color:var(--muted);font-size:10px">buy ${L.cR}g dry${L.carb==='Brown rice'||L.carb==='Quinoa'?' (~'+Math.round(L.cR/10)+' tbsp)':''}</span></span></div>
+      <div class="ing-row"><span class="ing-name">${L.veg}</span><span class="ing-qty">${L.vC}</span></div>
+      <div class="ing-row"><span class="ing-name">Olive oil</span><span class="ing-qty">${L.oil}ml</span></div>
+      <div class="ing-row"><span class="ing-name">Lemon juice</span><span class="ing-qty">½ lemon</span></div>
+      <div class="ing-row"><span class="ing-name">Sea salt + pepper</span><span class="ing-qty">to taste</span></div>
+      <div class="method-box"><div class="method-label">Method</div>Pack cold in glass container. Protein batch cooked Sunday. Dressing in small separate glass jar — add when eating.</div>`;
+  } else {
+    icon='🍽️';
+    const D=meal.D;
+    title=`${D.pC}g ${D.p} · ${D.cC}g ${D.carb} · ${D.veg}`;
+    sub=`After work · ~${prot}g protein · cook fresh`;
+    bodyHTML=`
+      <div class="ing-row"><div><span class="ing-name">${D.p}</span><div class="ing-note">${COOK_METHOD[D.pKey]||''}</div></div><span class="ing-qty">${D.pC}g cooked<br><span style="color:var(--muted);font-size:10px">buy ${D.pR}g raw</span></span></div>
+      <div class="ing-row"><span class="ing-name">${D.carb}</span><span class="ing-qty">${D.cC}g cooked<br><span style="color:var(--muted);font-size:10px">buy ${D.cR}g dry${D.carb==='Brown rice'||D.carb==='Quinoa'?' (~'+Math.round(D.cR/10)+' tbsp)':''}</span></span></div>
+      <div class="ing-row"><span class="ing-name">${D.veg}</span><span class="ing-qty">${D.vC}</span></div>
+      <div class="ing-row"><span class="ing-name">Olive oil</span><span class="ing-qty">${D.oil}ml</span></div>
+      <div class="ing-row"><span class="ing-name">Garlic</span><span class="ing-qty">2 cloves crushed</span></div>
+      <div class="ing-row"><span class="ing-name">Sea salt + pepper</span><span class="ing-qty">to taste</span></div>
+      <div class="method-box"><div class="method-label">Method</div>${COOK_METHOD[D.pKey]||'Cook fresh.'} Season and serve.</div>`;
+  }
+
+  div.innerHTML=`
+    <div class="meal-card-hdr" onclick="toggleCard('${id}')">
+      <span class="meal-card-icon">${icon}</span>
+      <div class="meal-card-info">
+        <div class="meal-card-title">${title}</div>
+        <div class="meal-card-sub">${sub}</div>
+      </div>
+      <span class="meal-card-arrow" id="${id}-arrow">▼</span>
+    </div>
+    <div class="meal-card-body" id="${id}-body">${bodyHTML}</div>`;
+
+  wrap.appendChild(div);
+}
+
+function toggleCard(id){
+  const body=document.getElementById(id+'-body');
+  const arrow=document.getElementById(id+'-arrow');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  arrow.classList.toggle('open',!open);
+}
+
+// Routine blocks per day type
+function getDayType(date){
+  const dow=date.getDay();
+  if(dow===3)return 'wednesday';
+  if(dow===6)return 'saturday';
+  if(dow===0)return 'sunday';
+  return 'pilates';
+}
+
+const ROUTINES={
+  pilates:[
+    {t:'4:00am',min:4*60,d:'25 min',title:'Wake + get ready',note:'500ml water · moringa · get dressed · brush teeth · grab bag',c:'var(--p2)'},
+    {t:'4:25am',min:4*60+25,d:'45 min',title:'Commute to pilates',note:'Calm music only · no work calls',c:'var(--p2)'},
+    {t:'5:15am',min:5*60+15,d:'45 min',title:'Pilates — fasted',note:'Full class',c:'var(--p2)'},
+    {t:'6:00am',min:6*60,d:'30 min',title:'Shower + get ready at studio',note:'Hot shower · dressed · morning skincare + makeup',c:'var(--p4)'},
+    {t:'6:30am',min:6*60+30,d:'30 min',title:'Commute to work',note:'Calm music · no calls',c:'var(--p2)'},
+    {t:'7:00am',min:7*60,d:'variable',title:'Work',note:'2.5L water · two flat whites before 11am only',c:'var(--muted)'},
+    {t:'8:00am',min:8*60,d:'10 min',title:'Yoghurt bowl',note:'Eating window opens · sit down · eat slowly',c:'var(--p4)'},
+    {t:'11:30am',min:11*60+30,d:'20 min',title:'Lunch',note:'Glass container · cold · phase-specific',c:'var(--p4)'},
+    {t:'4:30pm',min:16*60+30,d:'25 min',title:'Arrive home · change · decompress',note:'Change immediately · sit down · glass of water · no phone',c:'var(--p2)'},
+    {t:'4:55pm',min:16*60+55,d:'40 min',title:'Cook and eat dinner',note:'Chicken breast or barramundi · sweet potato + veg',c:'var(--p3)'},
+    {t:'5:35pm',min:17*60+35,d:'20 min',title:'Hot shower',note:'As hot as possible · cortisol reset',c:'var(--p4)'},
+    {t:'5:55pm',min:17*60+55,d:'10 min',title:'Evening skincare',note:'Full routine',c:'var(--p4)'},
+    {t:'6:05pm',min:18*60+5,d:'5 min',title:'Supplements',note:'Creatine + magnesium glycinate',c:'var(--p4)'},
+    {t:'6:10pm',min:18*60+10,d:'remaining',title:'Wind down',note:'Book · stretching · legs up wall · 4-7-8 breathing · no phone',c:'var(--p4)'},
+    {t:'8:25pm',min:20*60+25,d:'5 min',title:'Night prep',note:'Pilates clothes out · bag packed · 4am alarm · phone out',c:'var(--p4)'},
+    {t:'8:30pm',min:20*60+30,d:'—',title:'Bed — non-negotiable',note:'Eyes closed · asleep by 9pm · 7 hours before 4am',c:'var(--p1)'},
+  ],
+  wednesday:[
+    {t:'6:00am',min:6*60,d:'15 min',title:'Wake + get ready',note:'500ml water · moringa · get dressed',c:'var(--p2)'},
+    {t:'6:15am',min:6*60+15,d:'60 min',title:'Commute to work',note:'60 min from home · calm music',c:'var(--p2)'},
+    {t:'7:15am',min:7*60+15,d:'variable',title:'Work',note:'2.5L water · two flat whites before 11am only',c:'var(--muted)'},
+    {t:'8:00am',min:8*60,d:'10 min',title:'Yoghurt bowl',note:'Eating window opens',c:'var(--p4)'},
+    {t:'11:30am',min:11*60+30,d:'20 min',title:'Lunch',note:'Glass container · cold · phase-specific',c:'var(--p4)'},
+    {t:'4:30pm',min:16*60+30,d:'25 min',title:'Arrive home · change · decompress',note:'Change immediately · sit down · no phone',c:'var(--p2)'},
+    {t:'4:55pm',min:16*60+55,d:'15 min',title:'Sort + put laundry on',note:'Separate clothes · 60 min wash cycle begins',c:'var(--p3)'},
+    {t:'5:10pm',min:17*60+10,d:'40 min',title:'Cook and eat dinner',note:'Chicken breast or barramundi · sweet potato + veg',c:'var(--p3)'},
+    {t:'5:50pm',min:17*60+50,d:'10 min',title:'Hang laundry',note:'Hang the 60 min wash load',c:'var(--p3)'},
+    {t:'6:00pm',min:18*60,d:'60 min',title:'Evening walk',note:'Outside · no phone · cortisol regulation',c:'var(--p2)'},
+    {t:'7:00pm',min:19*60,d:'20 min',title:'Hot shower',note:'As hot as possible · cortisol reset',c:'var(--p4)'},
+    {t:'7:20pm',min:19*60+20,d:'10 min',title:'Evening skincare',note:'Full routine',c:'var(--p4)'},
+    {t:'7:30pm',min:19*60+30,d:'5 min',title:'Supplements',note:'Creatine + magnesium glycinate',c:'var(--p4)'},
+    {t:'7:35pm',min:19*60+35,d:'50 min',title:'Wind down',note:'Book · breathing · no phone',c:'var(--p4)'},
+    {t:'8:25pm',min:20*60+25,d:'5 min',title:'Night prep',note:'Pilates clothes out · bag packed · 4am alarm · phone out',c:'var(--p4)'},
+    {t:'8:30pm',min:20*60+30,d:'—',title:'Bed',note:'Eyes closed · asleep by 9pm',c:'var(--p1)'},
+  ],
+  saturday:[
+    {t:'7:00am',min:7*60,d:'—',title:'Wake — no alarm',note:'500ml water · moringa · no rush',c:'var(--p2)'},
+    {t:'7:30am',min:7*60+30,d:'60-90 min',title:'Grocery shop',note:'Follow weekly grocery list · Harris Farm or farmers market',c:'var(--p2)'},
+    {t:'8:00am',min:8*60,d:'15 min',title:'Yoghurt bowl',note:'Phase-specific additions · take your time',c:'var(--p4)'},
+    {t:'—',min:10*60,d:'variable',title:'Refeed — eat out',note:'Steak or Thai · 1,800-2,000 kcal',c:'var(--refeed)'},
+    {t:'—',min:19*60,d:'20 min',title:'Evening walk',note:'Outside · no phone',c:'var(--p2)'},
+    {t:'—',min:19*60+30,d:'20 min',title:'Hot shower',note:'As hot as possible',c:'var(--p4)'},
+    {t:'—',min:19*60+50,d:'10 min',title:'Evening skincare',note:'Full routine',c:'var(--p4)'},
+    {t:'—',min:20*60,d:'5 min',title:'Supplements',note:'Creatine + magnesium glycinate',c:'var(--p4)'},
+    {t:'—',min:20*60+5,d:'remaining',title:'Wind down',note:'Book · breathing · no phone',c:'var(--p4)'},
+    {t:'10:00pm',min:22*60,d:'—',title:'Bed',note:'Later bedtime — no 4am tomorrow',c:'var(--p1)'},
+  ],
+  sunday:[
+    {t:'7:00am',min:7*60,d:'—',title:'Wake — no alarm',note:'500ml water · moringa · legs up wall 10 min',c:'var(--p2)'},
+    {t:'8:00am',min:8*60,d:'15 min',title:'Yoghurt bowl',note:'Eating window opens · phase-specific additions',c:'var(--p4)'},
+    {t:'9:00am',min:9*60,d:'90 min',title:'Sunday batch cook',note:'Proteins · grains · veg · yoghurt jars for the week',c:'var(--p3)'},
+    {t:'10:30am',min:10*60+30,d:'20 min',title:'Lunch',note:'Glass container · cold · phase-specific',c:'var(--p4)'},
+    {t:'—',min:13*60,d:'20 min',title:'Recovery walk',note:'Outside · no phone · weekly unstructured time',c:'var(--p2)'},
+    {t:'7:00pm',min:19*60,d:'—',title:'Phone face down',note:'Non-negotiable every Sunday from now',c:'var(--p4)'},
+    {t:'7:00pm',min:19*60,d:'20 min',title:'Hot shower',note:'Full shower · decompress',c:'var(--p4)'},
+    {t:'7:20pm',min:19*60+20,d:'10 min',title:'Evening skincare',note:'Full routine',c:'var(--p4)'},
+    {t:'7:30pm',min:19*60+30,d:'5 min',title:'Supplements',note:'Creatine + magnesium glycinate',c:'var(--p4)'},
+    {t:'7:35pm',min:19*60+35,d:'30 min',title:'Wind down',note:'Legs up wall · 4-7-8 breathing · dim lights · book only',c:'var(--p4)'},
+    {t:'8:05pm',min:20*60+5,d:'20 min',title:'Night prep',note:'Pilates clothes out · bag packed · 4am alarm · phone out',c:'var(--p4)'},
+    {t:'8:30pm',min:20*60+30,d:'—',title:'Bed — non-negotiable',note:'Eyes closed · 9pm · 7 hours before 4am Monday',c:'var(--p1)'},
+  ],
+};
+
+let showPast=false;
+
+function buildTimeline(date){
+  const type=getDayType(date);
+  const blocks=ROUTINES[type];
+  const now=new Date();
+  const nowMin=now.getHours()*60+now.getMinutes();
+
+  // Find current block index
+  let currentIdx=-1;
+  for(let i=0;i<blocks.length-1;i++){
+    if(nowMin>=blocks[i].min&&nowMin<blocks[i+1].min){currentIdx=i;break;}
+  }
+  if(nowMin>=blocks[blocks.length-1].min)currentIdx=blocks.length-1;
+
+  const pastBlocks=blocks.filter((_,i)=>i<currentIdx);
+  const activeAndFuture=blocks.filter((_,i)=>i>=currentIdx);
+
+  let h=`<div class="timeline-hdr">
+    <span class="timeline-title">Today's schedule</span>
+    ${pastBlocks.length>0?`<button class="timeline-toggle" onclick="togglePast()">${showPast?'Hide past':'Show past ('+pastBlocks.length+')'}</button>`:''}
+  </div>`;
+
+  if(currentIdx>=0){
+    const cur=blocks[currentIdx];
+    h+=`<div class="now-indicator"><div class="now-dot"></div><span class="now-text">Now: ${cur.title}</span></div>`;
+  }
+
+  // Past blocks
+  if(showPast&&pastBlocks.length>0){
+    h+='<div id="past-blocks">';
+    pastBlocks.forEach(b=>{
+      h+=`<div class="tblock past">
+        <div class="tblock-bar" style="background:${b.c}"></div>
+        <div class="tblock-time"><div class="tblock-t" style="color:${b.c}">${b.t}</div><div class="tblock-d">${b.d}</div></div>
+        <div class="tblock-body"><div class="tblock-title" style="color:var(--muted)">${b.title}</div></div>
+      </div>`;
+    });
+    h+='</div>';
+  }
+
+  // Current + future
+  activeAndFuture.forEach((b,i)=>{
+    const isCurrent=i===0&&currentIdx>=0;
+    h+=`<div class="tblock ${isCurrent?'current':'future'}">
+      <div class="tblock-bar" style="background:${b.c}"></div>
+      <div class="tblock-time"><div class="tblock-t" style="color:${b.c}">${b.t}</div><div class="tblock-d">${b.d}</div></div>
+      <div class="tblock-body">
+        <div class="tblock-title"${isCurrent?` style="color:var(--p3)"`:''}>${b.title}</div>
+        <div class="tblock-note">${b.note}</div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('timeline-wrap').innerHTML=h;
+}
+
+function togglePast(){
+  showPast=!showPast;
+  if(plan.length>0)buildTimeline(plan[0].date);
+}
+
+function buildCal(){
+  const el=document.getElementById('cal-wrap');
+  const today=new Date();
+  let h='';
+
+  // Group plan days by month
+  const months={};
+  plan.forEach(d=>{
+    const key=d.date.getFullYear()+'-'+(d.date.getMonth()+1);
+    if(!months[key])months[key]={label:d.date.toLocaleDateString('en-AU',{month:'long',year:'numeric'}),days:[]};
+    months[key].days.push(d);
+  });
+
+  Object.values(months).forEach(month=>{
+    h+=`<div style="margin-bottom:28px">`;
+    h+=`<div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:12px;padding:0 0 8px;border-bottom:1px solid var(--border)">${month.label}</div>`;
+
+    // Day of week headers
+    h+='<div class="cal-week" style="margin-bottom:4px">';
+    ['MON','TUE','WED','THU','FRI','SAT','SUN'].forEach(d=>h+=`<div class="cal-dow">${d}</div>`);
+    h+='</div>';
+
+    // Work out offset for first day of month
+    const firstDay=month.days[0].date;
+    const fd=firstDay.getDay();
+    const off=fd===0?6:fd-1;
+
+    let weeks=[],week=new Array(off).fill(null);
+    month.days.forEach(d=>{
+      week.push(d);
+      if(week.length===7){weeks.push(week);week=[];}
+    });
+    if(week.length){while(week.length<7)week.push(null);weeks.push(week);}
+
+    weeks.forEach(w=>{
+      h+='<div class="cal-week">';
+      w.forEach(d=>{
+        if(!d){h+='<div></div>';return;}
+        const isTod=d.date.toDateString()===today.toDateString();
+        const cls=d.isR?'rfd':d.phase.cls;
+        const col=d.isR?'var(--refeed)':d.phase.color;
+        h+=`<div class="cal-day ${cls}${isTod?' today':''}">
+          <div class="cal-dow-lbl">${fmtDow(d.date)}</div>
+          <div class="cal-num">${d.date.getDate()}</div>
+          <div class="cal-cd" style="color:${col}">D${d.cd}</div>
+          ${d.isR?`<div class="cal-meal" style="color:var(--refeed)">Refeed</div>`:
+          `<div class="cal-meal"><b>L</b> ${d.mealDay.L.p.split(' ')[0]}</div>
+          <div class="cal-meal"><b>D</b> ${d.mealDay.D.p.split(' ')[0]}</div>
+          <div class="cal-prot" style="color:${col}">~${d.tp}g</div>`}
+        </div>`;
+      });
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+
+  el.innerHTML=h;
+}
+
+function buildMeals(){
+  const el=document.getElementById('meals-list');
+
+  // Calorie estimates per ingredient (per gram, cooked weight)
+  const KCAL={
+    beef_mince:2.1, sirloin_steak:2.1, chicken_thigh:1.65, chicken_breast:1.6,
+    salmon:2.08, barramundi:1.1,
+    'Brown rice':1.3, 'Quinoa':1.2, 'Sweet potato':0.86,
+    spinach:0.23, broccolini:0.35, broccoli:0.34, kale:0.49,
+    'bok choy':0.13, cauliflower:0.25, 'broccoli sprouts':0.36,
+    avocado:1.6, cucumber:0.16,
+    olive_oil:8.4, // per ml
+    // Bowl base
+    yoghurt:1.0, chia:4.86, walnuts:6.54, honey:3.04, coconut:6.0,
+    // Bowl adds
+    flaxseed:5.34, pumpkin:5.59, banana:0.89, blueberries:0.57,
+    sunflower:5.84, sesame:5.73, berries:0.52, moringa:2.64,
+    mango:0.6, almond_butter:6.14, dark_choc:5.9,
+  };
+
+  function ingKcal(key,g){ return Math.round((KCAL[key]||0)*g); }
+
+  // Build veg rows from the vC string
+  function vegRows(veg,vC){
+    // vC might be "80g" or "60g cucumber · 35g avocado" etc
+    const parts=vC.split('·').map(p=>p.trim());
+    const name=veg.toLowerCase();
+    if(parts.length===1){
+      const g=parseInt(parts[0]);
+      const k=ingKcal(name,g);
+      return [{n:veg,q:parts[0],k}];
+    }
+    // Multi-component
+    return parts.map(p=>{
+      const gMatch=p.match(/(\d+)g/);
+      const g=gMatch?parseInt(gMatch[1]):0;
+      // guess which veg it is from the string
+      const nm=p.replace(/\d+g/,'').trim();
+      const kcalKey=Object.keys(KCAL).find(k=>nm.toLowerCase().includes(k.replace(' ','')))||nm.toLowerCase();
+      const k=ingKcal(kcalKey,g);
+      return {n:nm,q:p,k};
+    });
+  }
+
+  let h=''; let lastPh=0;
+
+  plan.forEach(d=>{
+    // Phase header
+    if(!d.isR && d.ph!==lastPh){
+      lastPh=d.ph;
+      h+=`<div class="phase-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="phase-hdr-name">${d.phase.name}</span>
+          <span class="pill ${d.phase.pillcls}">Days ${d.phase.days[0]}–${d.phase.days[1]}</span>
+        </div>
+        <div class="phase-hdr-sub">${d.phase.focus}</div>
+      </div>`;
+    }
+
+    // Refeed Saturday
+    if(d.isR){
+      h+=`<div class="rf-card">
+        <div class="day-card-hdr">
+          <span class="day-card-date">${fmtDow(d.date)} ${fmtD(d.date)}</span>
+          <span class="pill pill-rf" style="margin-left:6px">Refeed</span>
+          <span class="day-card-macro">1,800–2,000 kcal</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:12px;line-height:1.6">
+          Yoghurt bowl as normal, then eat out for lunch and dinner.
+        </div>
+        <div class="rf-grid">
+          <div><div class="rf-col-title">🥩 Steak</div>${RS.map(s=>`<div class="rf-item">· ${s}</div>`).join('')}</div>
+          <div><div class="rf-col-title">🍜 Thai</div>${RT.map(s=>`<div class="rf-item">· ${s}</div>`).join('')}</div>
+        </div>
+      </div>`;
+      return;
+    }
+
+    const L=d.mealDay.L; const D=d.mealDay.D;
+    const ph=d.phase;
+
+    // ── Bowl ingredients ───────────────────────────────────────────
+    const bowlBase=[
+      {n:'Greek yoghurt full-fat',q:'200g',k:ingKcal('yoghurt',200)},
+      {n:'Chia seeds',q:'12g',k:ingKcal('chia',12)},
+      {n:'Walnuts raw',q:'15g',k:ingKcal('walnuts',15)},
+      {n:'Raw honey',q:'5g',k:ingKcal('honey',5)},
+      {n:'Coconut flakes',q:'5g',k:ingKcal('coconut',5)},
+    ];
+    const bowlAddsMap={
+      1:[
+        {n:'Ground flaxseed',q:'10g',k:ingKcal('flaxseed',10)},
+        {n:'Pumpkin seeds',q:'10g',k:ingKcal('pumpkin',10)},
+        {n:'Banana',q:'50g',k:ingKcal('banana',50)},
+      ],
+      2:[
+        {n:'Blueberries',q:'60g',k:ingKcal('blueberries',60)},
+        {n:'Ground flaxseed',q:'10g',k:ingKcal('flaxseed',10)},
+        {n:'Pumpkin seeds',q:'10g',k:ingKcal('pumpkin',10)},
+      ],
+      3:[
+        {n:'Mixed berries',q:'60g',k:ingKcal('berries',60)},
+        {n:'Sunflower seeds',q:'10g',k:ingKcal('sunflower',10)},
+        {n:'Sesame seeds',q:'5g',k:ingKcal('sesame',5)},
+        {n:'Moringa powder',q:'5g',k:ingKcal('moringa',5)},
+      ],
+      4:[
+        {n:'Mango fresh',q:'60g',k:ingKcal('mango',60)},
+        {n:'Almond butter',q:'10g',k:ingKcal('almond_butter',10)},
+        {n:'Dark chocolate 85%',q:'8g',k:ingKcal('dark_choc',8)},
+        {n:'Sunflower seeds',q:'10g',k:ingKcal('sunflower',10)},
+      ],
+    };
+    const bowlAdds=bowlAddsMap[d.ph]||[];
+    const bowlAll=[...bowlBase,...bowlAdds];
+    const bowlKcal=bowlAll.reduce((s,i)=>s+i.k,0);
+
+    // ── Lunch ingredients ──────────────────────────────────────────
+    const lunchVegRows=vegRows(L.veg,L.vC);
+    const lunchKcal=Math.round(
+      (KCAL[L.pKey]||0)*L.pC +
+      (KCAL[L.carb]||0)*L.cC +
+      lunchVegRows.reduce((s,v)=>s+v.k,0) +
+      ingKcal('olive_oil',L.oil)
+    );
+
+    // ── Dinner ingredients ─────────────────────────────────────────
+    const dinnerVegRows=vegRows(D.veg,D.vC);
+    const dinnerKcal=Math.round(
+      (KCAL[D.pKey]||0)*D.pC +
+      (KCAL[D.carb]||0)*D.cC +
+      dinnerVegRows.reduce((s,v)=>s+v.k,0) +
+      ingKcal('olive_oil',D.oil)
+    );
+
+    const dayKcal=bowlKcal+lunchKcal+dinnerKcal;
+
+    function ingRow(n,q,k){
+      return `<div class="meal-ing-row">
+        <span class="meal-ing-name">${n}</span>
+        <span class="meal-ing-qty">${q}</span>
+        ${k?`<span class="meal-ing-kcal">${k} kcal</span>`:'<span class="meal-ing-kcal"></span>'}
+      </div>`;
+    }
+
+    h+=`<div class="day-card">
+      <div class="day-card-hdr">
+        <div>
+          <span class="day-card-date">${fmtDow(d.date)} ${fmtD(d.date)}</span>
+          <span style="font-size:11px;color:${d.phase.color};font-weight:600;margin-left:8px">Day ${d.cd}</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${dayKcal} kcal</div>
+          <div style="font-size:11px;color:var(--muted)">~${d.tp}g protein</div>
+        </div>
+      </div>
+
+      <div class="meal-section">
+        <div class="meal-section-hdr">
+          <span class="meal-section-icon">🥣</span>
+          <span class="meal-section-title">Breakfast <span class="meal-section-time">8:00am</span></span>
+          <span class="meal-section-total">${bowlKcal} kcal · ${ph.bowl_p}g protein</span>
+        </div>
+        ${bowlAll.map(i=>ingRow(i.n,i.q,i.k)).join('')}
+      </div>
+
+      <div class="meal-section">
+        <div class="meal-section-hdr">
+          <span class="meal-section-icon">🥗</span>
+          <span class="meal-section-title">Lunch <span class="meal-section-time">11:30am · cold · glass container</span></span>
+          <span class="meal-section-total">${lunchKcal} kcal · ~${d.lp}g protein</span>
+        </div>
+        ${ingRow(L.p, L.pC+'g cooked', Math.round((KCAL[L.pKey]||0)*L.pC))}
+        ${ingRow(L.carb, L.cC+'g cooked', Math.round((KCAL[L.carb]||0)*L.cC))}
+        ${lunchVegRows.map(v=>ingRow(v.n,v.q,v.k)).join('')}
+        ${ingRow('Olive oil', L.oil+'ml', ingKcal('olive_oil',L.oil))}
+        ${ingRow('Lemon juice','½ lemon',4)}
+        ${ingRow('Sea salt + pepper','to taste',0)}
+      </div>
+
+      <div class="meal-section">
+        <div class="meal-section-hdr">
+          <span class="meal-section-icon">🍽️</span>
+          <span class="meal-section-title">Dinner <span class="meal-section-time">after work · cook fresh</span></span>
+          <span class="meal-section-total">${dinnerKcal} kcal · ~${d.dp}g protein</span>
+        </div>
+        ${ingRow(D.p, D.pC+'g cooked', Math.round((KCAL[D.pKey]||0)*D.pC))}
+        ${ingRow(D.carb, D.cC+'g cooked', Math.round((KCAL[D.carb]||0)*D.cC))}
+        ${dinnerVegRows.map(v=>ingRow(v.n,v.q,v.k)).join('')}
+        ${ingRow('Olive oil', D.oil+'ml', ingKcal('olive_oil',D.oil))}
+        ${ingRow('Garlic','2 cloves',8)}
+        ${ingRow('Sea salt + pepper','to taste',0)}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML=h;
+}
+
+function buildGroc(){
+  const el=document.getElementById('groc-wrap');
+  const sd=getTodayStr();
+  const todayDate=new Date(sd); todayDate.setHours(0,0,0,0);
+  const dow=todayDate.getDay(); // 0=Sun, 6=Sat
+
+  // Days until next Saturday
+  const daysToNextSat=dow===6?7:(6-dow+7)%7||7;
+
+  // Days since last Saturday (the one we shopped on)
+  // If today IS Saturday, last Saturday = 7 days ago (we just shopped today, show it as current)
+  const daysSinceLastSat=dow===6?0:(dow+1)%7||7;
+
+  let h=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;padding:0 16px">
+    Tap a week to expand. Quantities are exact per phase. Previous week shown so you can check what you already bought.
+  </div>`;
+
+  // Build weeks: previous + current + future
+  // Previous week = last Saturday back 7 days before that
+  // We'll generate weeks starting from 2 Saturdays ago
+
+  // Index of next Saturday in plan (0-based from today)
+  const nextSatIdx=daysToNextSat; // plan[nextSatIdx] = next Saturday
+  // Last Saturday relative to today
+  const lastSatIdx=dow===6?0:-(daysSinceLastSat); // negative = in the past
+
+  // Generate past week using PLAN31 cycle data
+  // We need to reconstruct what the grocery list was for the previous week
+  // by working out which cycle days fell in that window
+
+  function makePastWeekData(startDaysAgo, numDays){
+    // Build an array of plan-like objects for days in the past
+    const days=[];
+    for(let i=0;i<numDays;i++){
+      const d=new Date(todayDate);
+      d.setDate(d.getDate()-(startDaysAgo-i));
+      d.setHours(0,0,0,0);
+      const isSatDay=d.getDay()===6;
+      // Work out cycle day for this date using anchor
+      const anchor=getAnchor();
+      let activeAnchor=anchor;
+      if(anchor.pending){
+        const pendingDate=new Date(anchor.pending.date); pendingDate.setHours(0,0,0,0);
+        if(d>=pendingDate)activeAnchor=anchor.pending;
+      }
+      const cd=cycleDayForDate(d,activeAnchor);
+      const ph=gph(cd);
+      const mealDay=PLAN31.find(m=>m.cd===cd)||PLAN31[0];
+      days.push({date:d,cd,ph,phase:PH[ph],isR:isSatDay,mealDay});
+    }
+    return days;
+  }
+
+  // Week labels
+  const weekDefs=[];
+
+  // Previous week (last Saturday to last Friday)
+  if(daysSinceLastSat>=1 || dow===6){
+    // Last Saturday = daysSinceLastSat days ago (or today if Saturday)
+    const prevSatDaysAgo=dow===6?7:daysSinceLastSat;
+    weekDefs.push({
+      label:'Previous week (already shopped)',
+      isPast:true,
+      isPrev:true,
+      planDays:null,
+      pastStart:prevSatDaysAgo,
+      pastNum:7
+    });
+  }
+
+  // Current week — Saturday to Friday
+  // Current Saturday = dow===6 ? today : last Saturday
+  if(dow===6){
+    // Today is Saturday — current week starts today
+    weekDefs.push({
+      label:'This week — shop today 🛒',
+      isPast:false,
+      isCurrent:true,
+      planDays:plan.slice(0,7)
+    });
+  } else {
+    // Current week: from last Saturday (in past) through coming Friday
+    // Mix past days + future plan days
+    const pastDays=makePastWeekData(daysSinceLastSat, daysSinceLastSat);
+    const futureDays=plan.slice(0, 7-daysSinceLastSat);
+    weekDefs.push({
+      label:`This week — shop next Sat ${fmtD(plan[daysToNextSat-1]?.date||new Date())} 🛒`,
+      isPast:false,
+      isCurrent:true,
+      planDays:[...pastDays,...futureDays]
+    });
+  }
+
+  // Future weeks (next Saturday onward)
+  let satIdx=daysToNextSat; let wn=1;
+  while(satIdx<SHOW && wn<=15){
+    const wd=plan.slice(satIdx,Math.min(satIdx+7,SHOW));
+    if(!wd.length)break;
+    weekDefs.push({
+      label:`Week ${wn+1} · ${fmtD(wd[0].date)} – ${fmtD(wd[wd.length-1].date)}`,
+      isPast:false,
+      isCurrent:false,
+      planDays:wd
+    });
+    satIdx+=7; wn++;
+  }
+
+  // Render all weeks
+  weekDefs.forEach((wdef,wi)=>{
+    const weekId='gw'+wi;
+    let wd;
+    if(wdef.pastDays!==undefined){
+      wd=makePastWeekData(wdef.pastStart, wdef.pastNum);
+    } else {
+      wd=wdef.planDays||[];
+    }
+    if(!wd.length)return;
+
+    const md=wd.filter(d=>!d.isR);
+    const pc={1:0,2:0,3:0,4:0}; md.forEach(d=>pc[d.ph]++);
+    const bpc={1:0,2:0,3:0,4:0}; wd.forEach(d=>bpc[d.ph]++);
+    const its=cg(pc,md,bpc,wd.length);
+    const totalItems=Object.values(its).reduce((s,l)=>s+l.length,0);
+    const phases=Object.entries(pc).filter(([p,c])=>c>0);
+
+    // Auto-open current week and previous week
+    const autoOpen=wdef.isCurrent||wdef.isPrev;
+    const borderStyle=wdef.isCurrent?`border-color:var(--p3);box-shadow:0 0 0 2px var(--p3bg),var(--shadow)`
+                     :wdef.isPrev?`border-color:var(--border);opacity:0.85`:
+                     ``;
+    const label=wdef.label;
+    const pastBadge=wdef.isPrev?`<span class="pill" style="background:var(--surface3);color:var(--muted);border:1px solid var(--border);margin-left:6px">past</span>`:'';
+    const curBadge=wdef.isCurrent?`<span class="pill pill-p3" style="margin-left:6px">current</span>`:'';
+
+    h+=`<div class="groc-week" style="${borderStyle}">
+      <div class="groc-week-hdr" onclick="toggleGrocWeek('${weekId}')">
+        <div style="flex:1">
+          <div class="groc-week-title">${label}${pastBadge}${curBadge}</div>
+          <div class="groc-week-sub" style="margin-top:6px">
+            ${phases.map(([p,c])=>`<span class="pill ${PH[p].pillcls}">${PH[p].name} ${c}d</span>`).join('')}
+            <span class="pill pill-rf">1 refeed</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:4px">${totalItems} items</span>
+          </div>
+        </div>
+        <div id="${weekId}-arrow" style="font-size:14px;color:var(--muted);transition:transform 0.25s;flex-shrink:0;${autoOpen?'transform:rotate(180deg)':''}">▼</div>
+      </div>
+      <div id="${weekId}" style="display:${autoOpen?'block':'none'}">`;
+
+    Object.entries(its).forEach(([cat,list])=>{
+      if(!list.length)return;
+      h+=`<div class="groc-section"><div class="groc-cat">${cat}</div>`;
+      list.forEach(item=>{
+        h+=`<div class="groc-item"><div class="groc-cb" onclick="this.classList.toggle('on')"></div><span class="groc-name">${item.name}</span><span class="groc-qty">${item.qty}</span></div>`;
+      });
+      h+='</div>';
+    });
+
+    h+=`</div></div>`;
+  });
+
+  el.innerHTML=h;
+}
+
+function toggleGrocWeek(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById(id+'-arrow');
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+
+function cg(pc,md,bpc,td){
+  const r100=n=>Math.ceil(n/100)*100;
+  const r50=n=>Math.ceil(n/50)*50;
+  const r25=n=>Math.ceil(n/25)*25;
+  // Collect cooked totals from PLAN31 data, then convert to raw for purchase
+  let ct_c=0,cb_c=0,sal_c=0,beef_c=0,bar_c=0,steak_c=0;
+  let rice_c=0,quinoa_c=0,sp_c=0;
+  md.forEach(d=>{
+    const L=d.mealDay.L; const D=d.mealDay.D;
+    if(L.pKey==='chicken_thigh')ct_c+=L.pC;
+    if(L.pKey==='salmon')sal_c+=L.pC;
+    if(L.pKey==='beef_mince')beef_c+=L.pC;
+    if(D.pKey==='chicken_breast')cb_c+=D.pC;
+    if(D.pKey==='salmon')sal_c+=D.pC;
+    if(D.pKey==='sirloin_steak')steak_c+=D.pC;
+    if(D.pKey==='barramundi')bar_c+=D.pC;
+    if(L.carb==='Brown rice')rice_c+=L.cC;
+    if(D.carb==='Brown rice')rice_c+=D.cC;
+    if(L.carb==='Quinoa')quinoa_c+=L.cC;
+    if(D.carb==='Quinoa')quinoa_c+=D.cC;
+    if(L.carb==='Sweet potato')sp_c+=L.cC;
+    if(D.carb==='Sweet potato')sp_c+=D.cC;
+  });
+  // Convert cooked → raw using yields
+  const toRaw=(c,y)=>Math.ceil(c/y);
+  const prot=[];
+  if(ct_c>0)prot.push({name:'Chicken thighs organic — lunch',qty:`${r100(toRaw(ct_c,0.75))}g raw`});
+  if(cb_c>0)prot.push({name:'Chicken breast — dinner, cook nightly',qty:`${r100(toRaw(cb_c,0.75))}g raw`});
+  if(sal_c>0)prot.push({name:'Salmon fillets fresh',qty:`${r100(toRaw(sal_c,0.85))}g raw`});
+  if(beef_c>0)prot.push({name:'Grass-fed beef mince — lunch',qty:`${r100(toRaw(beef_c,0.75))}g raw`});
+  if(steak_c>0)prot.push({name:'Sirloin steak — dinner, cook nightly',qty:`${r100(toRaw(steak_c,0.75))}g raw`});
+  if(bar_c>0)prot.push({name:'Barramundi fillets — dinner, cook nightly',qty:`${r100(toRaw(bar_c,0.85))}g raw`});
+  prot.push({name:'Greek yoghurt full-fat organic',qty:`${Math.ceil(td*200/1000*10)/10}kg`});
+  const gr=[];
+  if(rice_c>0)gr.push({name:'Brown rice (dry, uncooked)',qty:`${r100(toRaw(rice_c,2.8))}g dry`});
+  if(quinoa_c>0)gr.push({name:'Quinoa (dry, uncooked)',qty:`${r100(toRaw(quinoa_c,3.0))}g dry`});
+  if(sp_c>0)gr.push({name:'Sweet potato (raw)',qty:`${r100(toRaw(sp_c,0.88))}g`});
+  const bowl=[
+    {name:'Chia seeds',qty:`${r25(td*12)}g`},
+    {name:'Walnuts raw',qty:`${r25(td*15)}g`},
+    {name:'Coconut flakes unsweetened',qty:`${r25(td*5)}g`},
+    {name:'Raw honey',qty:'check stock'},
+  ];
+  const veg=[];
+  const av=md.flatMap(d=>[d.mealDay.L.veg,d.mealDay.D.veg]).join(' ');
+  if(av.includes('Spinach'))veg.push({name:'Baby spinach organic',qty:`${r50(md.filter(d=>d.mealDay.L.veg.includes('Spinach')||d.mealDay.D.veg.includes('Spinach')).length*40)}g`});
+  if(av.includes('Broccoli'))veg.push({name:'Broccoli organic',qty:`${r50(md.filter(d=>d.mealDay.L.veg.includes('Broccoli')||d.mealDay.D.veg.includes('Broccoli')).length*100)}g`});
+  if(av.includes('Broccolini'))veg.push({name:'Broccolini',qty:`${Math.ceil(md.filter(d=>d.mealDay.L.veg.includes('Broccolini')||d.mealDay.D.veg.includes('Broccolini')).length/2)+1} bunches`});
+  if(av.includes('Kale'))veg.push({name:'Kale organic',qty:`${Math.ceil(md.filter(d=>d.mealDay.L.veg.includes('Kale')||d.mealDay.D.veg.includes('Kale')).length/3)+1} bunches`});
+  if(av.includes('Cauliflower'))veg.push({name:'Cauliflower',qty:`${Math.ceil(md.filter(d=>d.mealDay.D.veg.includes('Cauliflower')).length)+1} heads`});
+  if(av.includes('Bok choy'))veg.push({name:'Bok choy',qty:`${md.filter(d=>d.mealDay.L.veg.includes('Bok choy')||d.mealDay.D.veg.includes('Bok choy')).length+1} heads`});
+  if(av.includes('sprouts'))veg.push({name:'Broccoli sprouts — RAW only',qty:`${md.filter(d=>d.mealDay.L.veg.includes('sprouts')).length} punnet(s)`});
+  if(av.toLowerCase().includes('avocado'))veg.push({name:'Avocado',qty:`${Math.ceil(md.length*0.4)}`});
+  if(av.toLowerCase().includes('cucumber'))veg.push({name:'Cucumber',qty:`${Math.ceil(md.length*0.3)}`});
+  veg.push({name:'Garlic',qty:`${Math.ceil(md.length*0.15)} bulbs`});
+  veg.push({name:'Lemons',qty:`${Math.ceil(md.length*0.3)}`});
+  const bp1=bpc[1]||0,bp2=bpc[2]||0,bp3=bpc[3]||0,bp4=bpc[4]||0;
+  const p1=pc[1]||0,p2=pc[2]||0,p3=pc[3]||0,p4=pc[4]||0;
+  const fr=[];
+  if(bp1>0)fr.push({name:'Bananas ripe (bowl P1)',qty:`${bp1}`});
+  if(bp4>0)fr.push({name:'Mango fresh (bowl P4)',qty:`${r50(bp4*60)}g`});
+  if(bp2>0)fr.push({name:'Blueberries organic (bowl P2)',qty:`${r50(bp2*60)}g`});
+  if(bp3>0)fr.push({name:'Mixed berries (bowl P3)',qty:`${r50(bp3*60)}g`});
+  const pan=[];
+  if(p1>0||p2>0)pan.push({name:'Ground flaxseed',qty:`${r25((p1+p2)*10)}g`});
+  if(p1>0||p2>0)pan.push({name:'Pumpkin seeds raw',qty:`${r25((p1+p2)*10)}g`});
+  if(p3>0||p4>0)pan.push({name:'Sunflower seeds raw',qty:`${r25((p3+p4)*10)}g`});
+  if(p3>0)pan.push({name:'Sesame seeds raw',qty:`${r25(p3*5)}g`});
+  if(p3>0)pan.push({name:'Moringa powder',qty:`${r25(p3*5)}g`});
+  if(p4>0)pan.push({name:'Almond butter (no additives)',qty:'1 jar'});
+  if(p4>0)pan.push({name:'Dark chocolate 85%+ organic',qty:`${r25(p4*8)}g`});
+  pan.push({name:'Olive oil (glass bottle)',qty:'check stock'});
+  pan.push({name:'Turmeric · cumin · garlic powder',qty:'check stock'});
+  pan.push({name:'Creatine monohydrate',qty:'check stock'});
+  pan.push({name:'Magnesium glycinate',qty:'check stock'});
+  return{Protein:prot,Grains:gr,'Bowl base':bowl,Vegetables:veg,'Fruit (bowl)':fr,'Seeds + pantry':pan};
+}
+
+function buildGuide(){
+  const el=document.getElementById('guide-phases');
+  let h=`<div class="guide-card">
+    <div class="guide-hdr" style="background:var(--reedbg);border-color:var(--reedborder)">
+      <div class="guide-name" style="color:var(--refeed)">Saturday refeed</div>
+      <div class="guide-focus" style="color:var(--refeed)">Every Saturday · eat out · 1,800-2,000 kcal</div>
+      <div class="guide-cal">Yoghurt bowl as normal. No processed food. No alcohol.</div>
+    </div>
+    <div class="guide-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+        <div><div style="font-weight:600;color:var(--refeed);margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em">Steak</div>${RS.map(s=>`<div style="color:var(--muted);margin-bottom:4px">· ${s}</div>`).join('')}</div>
+        <div><div style="font-weight:600;color:var(--refeed);margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em">Thai</div>${RT.map(s=>`<div style="color:var(--muted);margin-bottom:4px">· ${s}</div>`).join('')}</div>
+      </div>
+    </div>
+  </div>`;
+  [1,2,3,4].forEach(p=>{
+    const ph=PH[p];
+    h+=`<div class="guide-card">
+      <div class="guide-hdr">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="guide-name">${ph.name}</span><span class="pill ${ph.pillcls}">Days ${ph.days[0]}-${ph.days[1]}</span></div>
+        <div class="guide-focus" style="color:${ph.color}">${ph.focus}</div>
+        <div class="guide-cal">${ph.cal} kcal daily</div>
+      </div>
+      <div class="guide-body">
+        <div class="guide-row"><span class="guide-lbl">Bowl adds</span><span class="guide-val">${ph.bowl_adds.map(a=>a.name).join(' · ')}</span></div>
+        <div class="guide-row"><span class="guide-lbl">Daily target</span><span class="guide-val">${ph.cal} kcal · ~${ph.bowl_p}g protein from bowl</span></div>
+        <div class="guide-note">${ph.note}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function buildRoutine(){
+  const el=document.getElementById('guide-routine');
+  const ROUT=[
+    {label:'Pilates day',days:'Mon · Tue · Thu · Fri',color:'var(--p2)',note:'Wake 4:00am · Bed 8:30pm · Home by 4:30pm',key:'pilates'},
+    {label:'Wednesday',days:'Wednesday',color:'var(--refeed)',note:'Wake 6:00am · 60 min commute · Laundry + walk · Bed 8:30pm',key:'wednesday'},
+    {label:'Saturday',days:'Saturday',color:'var(--refeed)',note:'Wake flexible · Grocery shop · Refeed · Bed 10:00pm',key:'saturday'},
+    {label:'Sunday',days:'Sunday',color:'var(--p3)',note:'Wake flexible · Batch cook the week · Bed 8:30pm',key:'sunday'},
+  ];
+  let h='';
+  ROUT.forEach(r=>{
+    const blocks=ROUTINES[r.key];
+    h+=`<div class="routine-card">
+      <div class="routine-hdr" style="border-left:4px solid ${r.color};padding-left:14px">
+        <div class="routine-title" style="color:${r.color}">${r.label}</div>
+        <div class="routine-days">${r.days}</div>
+        <div class="routine-note">${r.note}</div>
+      </div>`;
+    blocks.forEach(b=>{
+      const isBed=b.title.includes('Bed');
+      const isWind=b.title.includes('Wind down');
+      const isEat=b.title.includes('bowl')||b.title.includes('Lunch')||b.title.includes('dinner')||b.title.includes('Refeed');
+      const bg=isBed?'var(--p1bg)':isWind?'var(--p4bg)':isEat?'var(--p2bg)':'transparent';
+      const borderColor=isBed?'var(--p1border)':isWind?'var(--p4border)':isEat?'var(--p2border)':'transparent';
+      h+=`<div class="rblock" style="background:${bg};${(isBed||isWind||isEat)?'border-left:none;':''}">
+        <div class="rblock-bar" style="background:${b.c}"></div>
+        <div class="rblock-time"><div class="rblock-t" style="color:${b.c}">${b.t}</div><div class="rblock-d">${b.d}</div></div>
+        <div class="rblock-body"><div class="rblock-title" style="${isBed?'color:var(--p1)':isWind?'color:var(--p4)':isEat?'color:var(--p2)':''}">${b.title}</div><div class="rblock-note">${b.note}</div></div>
+      </div>`;
+    });
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+
+function buildPrep(){
+  if(!plan.length)return;
+  const el=document.getElementById('prep-content');
+  const sd=getTodayStr();
+  const todayDate=new Date(sd); todayDate.setHours(0,0,0,0);
+  const dow=todayDate.getDay(); // 0=Sun
+
+  // Days until next Sunday
+  const dtsToSun=dow===0?7:(7-dow);
+  // Days since last Sunday (the one we already prepped on)
+  const daysSinceLastSun=dow===0?0:dow; // Sun=0, Mon=1, ... Sat=6
+
+  let h=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;padding:0 16px">
+    Previous and current week shown open. Tap future weeks to expand.
+  </div>`;
+
+  // Helper: build plan-like day objects for past dates using PLAN31 + anchor
+  function makePastDays(startDaysAgo, numDays){
+    const days=[];
+    for(let i=0;i<numDays;i++){
+      const d=new Date(todayDate);
+      d.setDate(d.getDate()-(startDaysAgo-i));
+      d.setHours(0,0,0,0);
+      const anchor=getAnchor();
+      let activeAnchor=anchor;
+      if(anchor.pending){
+        const pd=new Date(anchor.pending.date); pd.setHours(0,0,0,0);
+        if(d>=pd)activeAnchor=anchor.pending;
+      }
+      const cd=cycleDayForDate(d,activeAnchor);
+      const ph=gph(cd);
+      const mealDay=PLAN31.find(m=>m.cd===cd)||PLAN31[0];
+      days.push({date:d,cd,ph,phase:PH[ph],isR:d.getDay()===6,mealDay});
+    }
+    return days;
+  }
+
+  const weekDefs=[];
+
+  // ── Previous prep week ────────────────────────────────────────────
+  // Last Sunday to last Saturday = 7 days ending yesterday-ish
+  if(daysSinceLastSun>=1){
+    // Previous Sunday was daysSinceLastSun days ago
+    // That prep week covers: prevSun through prevSun+6
+    const prevSunDaysAgo=daysSinceLastSun+7; // Sunday before last
+    const prevWeekDays=makePastDays(prevSunDaysAgo, 7);
+    const prevSunDate=prevWeekDays[0].date;
+    weekDefs.push({
+      label:`Previous prep · Sun ${prevSunDate.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`,
+      isPrev:true, isCurrent:false,
+      days:prevWeekDays
+    });
+  }
+
+  // ── Current prep week ─────────────────────────────────────────────
+  // Current week runs from last Sunday through coming Saturday
+  if(dow===0){
+    // Today IS Sunday — current week starts today (plan[0..6])
+    weekDefs.push({
+      label:`This week · Sun ${todayDate.toLocaleDateString('en-AU',{day:'numeric',month:'short'})} — prep today 🍳`,
+      isPrev:false, isCurrent:true,
+      days:plan.slice(0,7)
+    });
+  } else {
+    // Mix past days (since last Sunday) + future plan days (to coming Saturday)
+    const pastDays=makePastDays(daysSinceLastSun, daysSinceLastSun);
+    const futureDays=plan.slice(0, 7-daysSinceLastSun);
+    const lastSunDate=new Date(todayDate); lastSunDate.setDate(lastSunDate.getDate()-daysSinceLastSun);
+    weekDefs.push({
+      label:`This week · Sun ${lastSunDate.toLocaleDateString('en-AU',{day:'numeric',month:'short'})} — already prepped`,
+      isPrev:false, isCurrent:true,
+      days:[...pastDays,...futureDays]
+    });
+  }
+
+  // ── Future prep weeks ─────────────────────────────────────────────
+  let sunIdx=dtsToSun; let wn=1;
+  while(sunIdx<SHOW && wn<=14){
+    const weekDays=plan.slice(sunIdx,Math.min(sunIdx+7,SHOW));
+    if(!weekDays.length)break;
+    const sundayDate=weekDays[0].date;
+    weekDefs.push({
+      label:`Week ${wn+1} · Sun ${sundayDate.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`,
+      isPrev:false, isCurrent:false,
+      days:weekDays
+    });
+    sunIdx+=7; wn++;
+  }
+
+  // ── Render all weeks ──────────────────────────────────────────────
+  weekDefs.forEach((wdef,wi)=>{
+    const weekId='pw'+wi;
+    const wd=wdef.days;
+    if(!wd.length)return;
+
+    const mealDays=wd.filter(d=>!d.isR);
+    const ph=mealDays[0]?mealDays[0].phase:wd[0].phase;
+    const pc={1:0,2:0,3:0,4:0};
+    mealDays.forEach(d=>pc[d.ph]++);
+    const phases=Object.entries(pc).filter(([p,c])=>c>0);
+
+    const autoOpen=wdef.isCurrent||wdef.isPrev;
+    const borderStyle=wdef.isCurrent
+      ?`border-color:var(--p3);box-shadow:0 0 0 2px var(--p3bg),var(--shadow)`
+      :wdef.isPrev?`border-color:var(--border);opacity:0.85`:``;
+
+    const pastBadge=wdef.isPrev?`<span class="pill" style="background:var(--surface3);color:var(--muted);border:1px solid var(--border);margin-left:6px">past</span>`:'';
+    const curBadge=wdef.isCurrent?`<span class="pill pill-p3" style="margin-left:6px">current</span>`:'';
+
+    const stepsHTML=buildPrepWeekHTML(wd, mealDays, ph, wi);
+
+    h+=`<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);${borderStyle}">
+      <div style="display:flex;align-items:center;gap:10px;padding:16px;cursor:pointer" onclick="togglePrepWeek('${weekId}')">
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px">${wdef.label}${pastBadge}${curBadge}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${phases.map(([p,c])=>`<span class="pill ${PH[p].pillcls}">${PH[p].name} ${c}d</span>`).join('')}
+            <span style="font-size:11px;color:var(--muted);align-self:center;margin-left:2px">· ~90 min prep</span>
+          </div>
+        </div>
+        <div id="${weekId}-arrow" style="font-size:14px;color:var(--muted);transition:transform 0.25s;flex-shrink:0;${autoOpen?'transform:rotate(180deg)':''}">▼</div>
+      </div>
+      <div id="${weekId}" style="display:${autoOpen?'block':'none'};border-top:1px solid var(--border);padding:14px 16px">
+        ${stepsHTML}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('prep-sub').textContent=`${weekDefs.length} weeks · previous + current open`;
+  el.innerHTML=h;
+}
+
+function togglePrepWeek(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById(id+'-arrow');
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+
+function buildPrepWeekHTML(weekDays,mealDays,ph,wn){
+  // Collect COOKED totals from PLAN31, then convert to raw for prep guide
+  let ct_c=0,cb_c=0,sal_c=0,beef_c=0,barra_c=0,steak_c=0;
+  let rice_c=0,quinoa_c=0,sp_c=0;
+  let vegNeeds={Spinach:0,Broccolini:0,Broccoli:0,Kale:0,'Bok choy':0,Cauliflower:0};
+  const yoghurtDays=weekDays.length;
+
+  mealDays.forEach(d=>{
+    const L=d.mealDay.L; const D=d.mealDay.D;
+    if(L.pKey==='chicken_thigh'){ct_c+=L.pC;}
+    if(L.pKey==='salmon'){sal_c+=L.pC;}
+    if(L.pKey==='beef_mince'){beef_c+=L.pC;}
+    if(D.pKey==='chicken_breast'){cb_c+=D.pC;}
+    if(D.pKey==='salmon'){sal_c+=D.pC;}
+    if(D.pKey==='sirloin_steak'){steak_c+=D.pC;}
+    if(D.pKey==='barramundi'){barra_c+=D.pC;}
+    if(L.carb==='Brown rice')rice_c+=L.cC;
+    if(D.carb==='Brown rice')rice_c+=D.cC;
+    if(L.carb==='Quinoa')quinoa_c+=L.cC;
+    if(D.carb==='Quinoa')quinoa_c+=D.cC;
+    if(L.carb==='Sweet potato')sp_c+=L.cC;
+    if(D.carb==='Sweet potato')sp_c+=D.cC;
+    [L.veg,D.veg].forEach(v=>{
+      if(v.includes('Spinach'))vegNeeds.Spinach+=40;
+      if(v.includes('Broccolini'))vegNeeds.Broccolini+=80;
+      if(v.includes('Broccoli'))vegNeeds.Broccoli+=100;
+      if(v.includes('Kale'))vegNeeds.Kale+=60;
+      if(v.includes('Bok choy'))vegNeeds['Bok choy']+=80;
+      if(v.includes('Cauliflower'))vegNeeds.Cauliflower+=100;
+    });
+  });
+
+  // Convert cooked → raw for purchasing/prepping
+  const toRaw=(c,y)=>c>0?Math.ceil(c/y):0;
+  const rice_r=toRaw(rice_c,2.8);
+  const quinoa_r=toRaw(quinoa_c,3.0);
+  const sp_r=toRaw(sp_c,0.88);
+  const ct_r=toRaw(ct_c,0.75);
+  const cb_r=toRaw(cb_c,0.75);
+  const sal_r=toRaw(sal_c,0.85);
+  const beef_r=toRaw(beef_c,0.75);
+  const steak_r=toRaw(steak_c,0.75);
+  const barra_r=toRaw(barra_c,0.85);
+
+  const r100=n=>n>0?Math.ceil(n/100)*100:0;
+  const steps=[];
+
+  // Cook order using RAW quantities
+  const orderItems=[
+    {time:'Start',text:'Preheat oven to 200°C.'},
+    rice_r>0?{time:'0 min',text:`Brown rice — pour ${r100(rice_r)}g raw into pot with ${r100(rice_r*2.5)}ml water. Bring to boil then simmer 30 min. Yields ~${r100(rice_c)}g cooked.`}:null,
+    quinoa_r>0?{time:'2 min',text:`Quinoa — ${r100(quinoa_r)}g raw into pot with ${r100(quinoa_r*1.8)}ml water. Boil then simmer 15 min. Yields ~${r100(quinoa_c)}g cooked.`}:null,
+    sp_r>0?{time:'5 min',text:`Sweet potato — ${r100(sp_r)}g raw, cube 2cm, onto baking tray, olive oil + salt. Oven 200°C 25 min. Yields ~${r100(sp_c)}g cooked.`}:null,
+    beef_r>0?{time:'10 min',text:`Beef mince — weigh ${r100(beef_r)}g raw into cast iron. Turmeric + cumin + garlic. Yields ~${r100(beef_c)}g cooked.`}:null,
+    ct_r>0?{time:'10 min',text:`Chicken thighs — ${r100(ct_r)}g raw into poaching pot — water + garlic + salt. Simmer 25 min. Yields ~${r100(ct_c)}g cooked shredded.`}:null,
+    steak_r>0?{time:'—',text:`Sirloin steak — ${r100(steak_r)}g raw in fridge. Cook fresh each night. Yields ~${r100(steak_c)}g cooked.`}:null,
+    {time:'20 min',text:'Rice and quinoa done. Drain, spread to cool.'},
+    vegNeeds.Broccolini>0?{time:'25 min',text:`Broccolini ${vegNeeds.Broccolini}g — onto oven tray last 10 min at 200°C.`}:null,
+    sal_r>0?{time:'30 min',text:`Salmon — ${r100(sal_r)}g raw on baking paper, lemon + dill. Oven 180°C 18 min. Yields ~${r100(sal_c)}g cooked.`}:null,
+    barra_r>0?{time:'—',text:`Barramundi — ${r100(barra_r)}g raw in fridge. Cook fresh each night. Yields ~${r100(barra_c)}g cooked.`}:null,
+    {time:'50 min',text:'Start portioning into glass containers. Label each with CD (cycle day).'},
+    {time:'70 min',text:`Prep ${yoghurtDays}x yoghurt bowl jars.`},
+    {time:'90 min',text:'Done. Refrigerate all. Steak + barramundi stay raw.'},
+  ].filter(Boolean);
+
+  steps.push({id:`order-${wn}`,color:'var(--p3)',bg:'var(--p3bg)',title:'Cook order',meta:'Read this first · raw quantities → cooked portions',isOrder:true,order:orderItems});
+
+  if(beef_c>0) steps.push({
+    id:`beef-${wn}`,color:'var(--p1)',bg:'var(--p1bg)',
+    title:`Beef mince · buy ${r100(beef_r)}g raw → ${r100(beef_c)}g cooked`,
+    meta:`${mealDays.filter(d=>d.mealDay.L.pKey==='beef_mince').length} lunch portions · ${r100(beef_c/mealDays.filter(d=>d.mealDay.L.pKey==='beef_mince').length)||0}g each`,
+    ings:[{n:'Grass-fed beef mince RAW',q:`${r100(beef_r)}g`},{n:'Olive oil',q:'1 tbsp'},{n:'Garlic crushed',q:'3 cloves'},{n:'Turmeric',q:'1 tsp'},{n:'Cumin',q:'1 tsp'},{n:'Sea salt',q:'To taste'}],
+    method:['Heat cast iron until smoking. Add oil then mince.','Break up immediately. Add garlic, turmeric, cumin.','Cook 8-10 min until no pink remains.','Cool completely. Weigh and portion into glass containers.'],
+    storage:`Fridge 4 days · cooked weight per container: ${mealDays.filter(d=>d.mealDay.L.pKey==='beef_mince').length>0?Math.round(beef_c/mealDays.filter(d=>d.mealDay.L.pKey==='beef_mince').length):0}g`
+  });
+
+  if(ct_c>0) steps.push({
+    id:`chicken-${wn}`,color:'var(--p2)',bg:'var(--p2bg)',
+    title:`Chicken thigh · buy ${r100(ct_r)}g raw → ${r100(ct_c)}g cooked`,
+    meta:`${mealDays.filter(d=>d.mealDay.L.pKey==='chicken_thigh').length} lunch portions`,
+    ings:[{n:'Chicken thighs organic RAW',q:`${r100(ct_r)}g`},{n:'Water',q:'Cover by 5cm'},{n:'Garlic cloves',q:'3'},{n:'Sea salt',q:'1 tsp'}],
+    method:['Place thighs in pot. Cover with cold water by 5cm.','Add garlic + salt. Bring to gentle simmer.','Poach 22-25 min. Juices run clear.','Shred with two forks while warm. Cool. Weigh and portion into glass containers.'],
+    storage:`Fridge 4 days · cooked weight per container: ${mealDays.filter(d=>d.mealDay.L.pKey==='chicken_thigh').length>0?Math.round(ct_c/mealDays.filter(d=>d.mealDay.L.pKey==='chicken_thigh').length):0}g`
+  });
+
+  if(cb_c>0) steps.push({
+    id:`cb-${wn}`,color:'var(--p2)',bg:'var(--p2bg)',
+    title:`Chicken breast · buy ${r100(cb_r)}g raw → cook nightly`,
+    meta:`${mealDays.filter(d=>d.mealDay.D.pKey==='chicken_breast').length} dinner portions · store raw · cook fresh`,
+    ings:[{n:'Chicken breast RAW',q:`${r100(cb_r)}g`}],
+    method:['Do NOT batch cook — dries out overnight.','Portion into 147g raw per serve (yields 110g cooked).','Store raw in glass containers in fridge.','Each night: cast iron hot, olive oil + garlic, 6-7 min each side.'],
+    storage:'Fridge raw 4 days · cook fresh nightly · cooked weight: 110g per serve'
+  });
+
+  if(steak_c>0) steps.push({
+    id:`steak-${wn}`,color:'var(--p1)',bg:'var(--p1bg)',
+    title:`Sirloin steak · buy ${r100(steak_r)}g raw → cook nightly`,
+    meta:`${mealDays.filter(d=>d.mealDay.D.pKey==='sirloin_steak').length} dinner portions · cook fresh`,
+    ings:[{n:'Sirloin steak RAW',q:`${r100(steak_r)}g`},{n:'Olive oil',q:'1 tbsp'},{n:'Garlic',q:'2 cloves'},{n:'Rosemary',q:'1 sprig'},{n:'Sea salt',q:'After cooking'}],
+    method:['Store raw in fridge — portion into individual serves.','Cast iron screaming hot. Rub steak with oil + garlic.','3 min each side for medium rare. Do not move.','Rest 3 min before cutting. Season AFTER cooking.'],
+    storage:`Fridge raw 4 days · cook fresh nightly · raw per serve: ${mealDays.filter(d=>d.mealDay.D.pKey==='sirloin_steak').length>0?Math.round(steak_r/mealDays.filter(d=>d.mealDay.D.pKey==='sirloin_steak').length):0}g raw → cooked weight shown above`
+  });
+
+  if(sal_c>0) steps.push({
+    id:`salmon-${wn}`,color:'var(--p3)',bg:'var(--p3bg)',
+    title:`Salmon · buy ${r100(sal_r)}g raw → ${r100(sal_c)}g cooked`,
+    meta:`${mealDays.filter(d=>d.mealDay.L.pKey==='salmon'||d.mealDay.D.pKey==='salmon').length} portions`,
+    ings:[{n:'Salmon fillets RAW',q:`${r100(sal_r)}g`},{n:'Olive oil',q:'1 tbsp'},{n:'Lemon',q:'1 sliced'},{n:'Dill fresh or dried',q:'1 tsp'},{n:'Sea salt + pepper',q:'To taste'}],
+    method:['Line tray with baking paper.','Place fillets skin-down. Drizzle oil, season, lemon + dill.','Bake 180°C for 15-18 min. Do not overcook.','Cool 20 min before portioning. Lunch portions cold. Dinner portions — note cooked weight per serve.'],
+    storage:'Fridge 3 days · eat first in the week'
+  });
+
+  if(barra_c>0) steps.push({
+    id:`barra-${wn}`,color:'var(--p3)',bg:'var(--p3bg)',
+    title:`Barramundi · buy ${r100(barra_r)}g raw → cook nightly`,
+    meta:`${mealDays.filter(d=>d.mealDay.D.pKey==='barramundi').length} dinner portions · store raw`,
+    ings:[{n:'Barramundi fillets RAW',q:`${r100(barra_r)}g`}],
+    method:['Store raw — do not batch cook.','Portion into individual serves (see per-day weights in Meals tab).','Each night: cast iron, olive oil + garlic + lemon, 4 min each side.'],
+    storage:`Fridge raw 3 days · cook fresh nightly`
+  });
+
+  // Grains
+  if(rice_c>0) steps.push({
+    id:`rice-${wn}`,color:'var(--p4)',bg:'var(--p4bg)',
+    title:`Brown rice · buy ${r100(rice_r)}g raw → ${r100(rice_c)}g cooked`,meta:'Batch cook · portion by cooked weight',
+    ings:[{n:'Brown rice RAW',q:`${r100(rice_r)}g`},{n:'Water',q:`${r100(rice_r*2.5)}ml`},{n:'Sea salt',q:'Pinch'}],
+    method:['Rinse rice under cold water until clear.','Pot with 2.5x volume water + salt. High heat to boil.','Reduce to lowest simmer. Cover. Cook 35-40 min.','Remove heat. Leave covered 10 min. Fluff. Cool completely. Portion by cooked weight.'],
+    storage:'Fridge 5 days · 1 large glass container'
+  });
+
+  if(quinoa_c>0) steps.push({
+    id:`quinoa-${wn}`,color:'var(--p4)',bg:'var(--p4bg)',
+    title:`Quinoa · buy ${r100(quinoa_r)}g raw → ${r100(quinoa_c)}g cooked`,meta:'Batch cook · scoop by cooked weight when portioning',
+    ings:[{n:'Quinoa RAW',q:`${r100(quinoa_r)}g`},{n:'Water',q:`${Math.round(quinoa_r*1.8/100)*100}ml`},{n:'Sea salt',q:'Pinch'}],
+    method:['Rinse quinoa — removes bitter saponins.','Pot with 1.8x water + salt. Boil then low simmer.','Cover. Cook 15 min until tails appear.','Leave covered 5 min. Fluff. Cool completely. Portion by cooked weight.'],
+    storage:'Fridge 5 days · 1 large glass container'
+  });
+
+  if(sp_c>0) steps.push({
+    id:`sp-${wn}`,color:'var(--p4)',bg:'var(--p4bg)',
+    title:`Sweet potato · buy ${r100(sp_r)}g raw → ${r100(sp_c)}g cooked`,meta:'Roasted · portion by cooked weight',
+    ings:[{n:'Sweet potato RAW',q:`${r100(sp_r)}g`},{n:'Olive oil',q:'2 tbsp'},{n:'Sea salt',q:'1 tsp'}],
+    method:['Peel and cube into 2cm pieces.','Toss with olive oil + salt until coated.','Single layer on baking paper lined tray.','Roast 200°C for 25 min until golden. Cool completely. Portion by cooked weight.'],
+    storage:'Fridge 5 days · cool fully before storing'
+  });
+
+  // Veg
+  const vegList=[];
+  if(vegNeeds.Spinach>0)vegList.push({n:'Baby spinach',q:`${vegNeeds.Spinach}g`,m:'Use fresh. Add straight to container when packing. No cooking.',s:'Fridge in bag · 5 days'});
+  if(vegNeeds.Broccolini>0)vegList.push({n:'Broccolini',q:`${vegNeeds.Broccolini}g`,m:'Roast on same tray as sweet potato. Last 10 min at 200°C. Cool, store glass.',s:'Fridge 4 days'});
+  if(vegNeeds.Broccoli>0)vegList.push({n:'Broccoli',q:`${vegNeeds.Broccoli}g`,m:'Florets on baking paper. Roast 200°C 20 min MAX — longer destroys sulforaphane. Cool, store glass.',s:'Fridge 4 days'});
+  if(vegNeeds.Kale>0)vegList.push({n:'Kale',q:`${vegNeeds.Kale}g`,m:'Wash and dry. Store raw. Massage with olive oil + lemon per portion when packing.',s:'Fridge raw 5 days'});
+  if(vegNeeds['Bok choy']>0)vegList.push({n:'Bok choy',q:`${vegNeeds['Bok choy']}g`,m:'Wash, shred raw. Never cook — add straight to container.',s:'Fridge 3 days'});
+  if(vegNeeds.Cauliflower>0)vegList.push({n:'Cauliflower',q:`${vegNeeds.Cauliflower}g`,m:'Florets roasted 200°C 20-25 min until golden. Cool, store glass.',s:'Fridge 4 days'});
+
+  if(vegList.length>0) steps.push({
+    id:`veg-${wn}`,color:'var(--p3)',bg:'var(--p3bg)',
+    title:`Vegetables · ${vegList.length} types`,meta:'Mix of roasted and raw',
+    isVeg:true,vegList
+  });
+
+  // Yoghurt jars
+  const bowlAdds=ph.bowl_adds||[];
+  steps.push({
+    id:`bowl-${wn}`,color:'var(--p2)',bg:'var(--p2bg)',
+    title:`Yoghurt bowl jars × ${yoghurtDays}`,meta:'Base prep only · add phase toppings each morning',
+    ings:[
+      {n:'Greek yoghurt full-fat organic',q:`${yoghurtDays*200}g total`},
+      {n:'Chia seeds',q:`${yoghurtDays*12}g total`},
+      {n:'Walnuts raw',q:`${yoghurtDays*15}g total`},
+      {n:'Coconut flakes unsweetened',q:`${yoghurtDays*5}g total`},
+      {n:'Raw honey',q:`${yoghurtDays*5}g total · add morning of`},
+    ],
+    method:[
+      `Line up ${yoghurtDays} glass containers with lids.`,
+      'Add 200g yoghurt to each. Stir in 12g chia seeds per jar.',
+      'Add 15g walnuts + 5g coconut flakes to each.',
+      'Seal and refrigerate. Add honey + phase toppings each morning.',
+    ],
+    addNote:`Add each morning this phase: ${bowlAdds.map(a=>a.name+' ('+a.qty+')').join(' · ')}`,
+    storage:`Fridge · ${yoghurtDays} glass jars with lids`
+  });
+
+  // Render all steps
+  const prefix=wn;
+  let html=`<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;border-left:3px solid var(--p3)">
+    <div style="font-size:11px;font-weight:600;color:var(--p3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px">This week</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.6">${mealDays.length} prepped days · ${yoghurtDays} yoghurt jars · ~90 min total</div>
+  </div>`;
+
+  steps.forEach((s,i)=>{
+    const sid=`${s.id}-body`;
+    const aid=`${s.id}-arr`;
+
+    if(s.isOrder){
+      html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer" onclick="togglePrepStep('${sid}','${aid}')">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--p3bg);color:var(--p3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">${s.title}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${s.meta}</div></div>
+          <span id="${aid}" style="font-size:12px;color:var(--muted);transition:transform 0.2s">▼</span>
+        </div>
+        <div id="${sid}" style="display:none;border-top:1px solid var(--border);padding:12px 14px">
+          ${s.order.filter(o=>o.text).map(o=>`<div style="display:flex;gap:10px;margin-bottom:8px;font-size:12px;line-height:1.5"><div style="background:var(--p3bg);color:var(--p3);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;white-space:nowrap;align-self:flex-start;margin-top:1px">${o.time}</div><div style="color:var(--muted)">${o.text}</div></div>`).join('')}
+        </div>
+      </div>`;
+      return;
+    }
+
+    if(s.isVeg){
+      html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer" onclick="togglePrepStep('${sid}','${aid}')">
+          <div style="width:24px;height:24px;border-radius:50%;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">${s.title}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${s.meta}</div></div>
+          <span id="${aid}" style="font-size:12px;color:var(--muted);transition:transform 0.2s">▼</span>
+        </div>
+        <div id="${sid}" style="display:none;border-top:1px solid var(--border);padding:12px 14px">
+          ${s.vegList.map(v=>`<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:600">${v.n}</span><span style="font-size:12px;color:var(--muted);font-weight:600">${v.q}</span></div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:4px">${v.m}</div>
+            <span style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--muted)">🧊 ${v.s}</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+      return;
+    }
+
+    html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer" onclick="togglePrepStep('${sid}','${aid}')">
+        <div style="width:24px;height:24px;border-radius:50%;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${s.title}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${s.meta}</div></div>
+        <span id="${aid}" style="font-size:12px;color:var(--muted);transition:transform 0.2s">▼</span>
+      </div>
+      <div id="${sid}" style="display:none;border-top:1px solid var(--border);padding:12px 14px">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Ingredients</div>
+        ${s.ings.map(ing=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text)">${ing.n}</span><span style="color:var(--muted);font-weight:600;margin-left:12px;font-size:12px;white-space:nowrap">${ing.q}</span></div>`).join('')}
+        <div style="margin-top:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Method</div>
+          ${s.method.map((m,mi)=>`<div style="display:flex;gap:10px;margin-bottom:8px;font-size:12px;line-height:1.5"><div style="width:20px;height:20px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0;margin-top:1px">${mi+1}</div><div style="color:var(--muted)">${m}</div></div>`).join('')}
+        </div>
+        ${s.storage?`<div style="margin-top:8px"><span style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted)">🧊 ${s.storage}</span></div>`:''}
+        ${s.addNote?`<div style="background:var(--p2bg);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:12px;color:var(--p2);line-height:1.5">⭐ ${s.addNote}</div>`:''}
+      </div>
+    </div>`;
+  });
+
+  return html;
+}
+
+function togglePrepStep(bodyId,arrowId){
+  const body=document.getElementById(bodyId);
+  const arrow=document.getElementById(arrowId);
+  if(!body||!arrow)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+
+function showScreen(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showGuide(tab){
+  ['phases','routine','history','settings'].forEach(t=>{
+    const el=document.getElementById('guide-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+    const btn=document.getElementById('guide-tab-'+t);
+    if(btn)btn.className='guide-tab-btn'+(t===tab?' active':'');
+  });
+  if(tab==='settings')updateResetStatus();
+  if(tab==='history')buildCycleHistory();
+}
+
+// ── CYCLE LOG & TRACKING SYSTEM ──────────────────────────────────────
+
+// Storage keys
+const LS_LOG='cycleLog';         // [{date:'YYYY-MM-DD', type:'period'|'spotting'|'good'}]
+const LS_HISTORY='cycleHistory'; // [{start:'YYYY-MM-DD', length:N}] — completed cycles
+
+function getLog(){
+  try{ return JSON.parse(localStorage.getItem(LS_LOG)||'[]'); }catch(e){ return []; }
+}
+function saveLog(log){
+  try{ localStorage.setItem(LS_LOG, JSON.stringify(log)); }catch(e){}
+}
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem(LS_HISTORY)||'[]'); }catch(e){ return []; }
+}
+function saveHistory(h){
+  try{ localStorage.setItem(LS_HISTORY, JSON.stringify(h)); }catch(e){}
+}
+
+// Average cycle length from history (min 3 entries for confidence)
+function getAvgCycleLength(){
+  const h=getHistory();
+  if(h.length===0)return CL; // default 31
+  const recent=h.slice(-6); // last 6 cycles
+  return Math.round(recent.reduce((s,c)=>s+c.length,0)/recent.length);
+}
+
+// Next period prediction
+function predictNextPeriod(){
+  const anchor=getAnchor();
+  const anchorDate=new Date(anchor.date);
+  anchorDate.setHours(0,0,0,0);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const diffDays=Math.round((today-anchorDate)/(1000*60*60*24));
+  const dayInCycle=((anchor.day+diffDays-1)%CL)+1;
+  const daysLeft=getAvgCycleLength()-dayInCycle;
+  if(daysLeft<=0)return null;
+  const next=new Date(today); next.setDate(next.getDate()+daysLeft);
+  return {date:next, daysAway:daysLeft};
+}
+
+// Log a day
+function logDay(type){
+  const sd=getTodayStr();
+  const log=getLog();
+
+  // Check if already logged today
+  const todayLog=log.find(l=>l.date===sd);
+  if(todayLog && todayLog.type===type){
+    // Un-log if tapping same button
+    const newLog=log.filter(l=>l.date!==sd);
+    saveLog(newLog);
+    buildLogStrip();
+    return;
+  }
+
+  // Remove existing today entry if any
+  const newLog=log.filter(l=>l.date!==sd);
+  newLog.push({date:sd, type});
+  // Keep last 90 days only
+  newLog.sort((a,b)=>a.date.localeCompare(b.date));
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-90);
+  const cutStr=cutoff.getFullYear()+'-'+(String(cutoff.getMonth()+1).padStart(2,'0'))+'-'+(String(cutoff.getDate()).padStart(2,'0'));
+  const trimmed=newLog.filter(l=>l.date>=cutStr);
+  saveLog(trimmed);
+
+  if(type==='period'){
+    handlePeriodStart(sd);
+  } else {
+    buildLogStrip();
+    updateConflictBanner();
+  }
+}
+
+function handlePeriodStart(sd){
+  // Find previous period start to calculate cycle length
+  const log=getLog().filter(l=>l.type==='period' && l.date<sd).sort((a,b)=>b.date.localeCompare(a.date));
+  if(log.length>0){
+    const prevStart=new Date(log[0].date); prevStart.setHours(0,0,0,0);
+    const thisStart=new Date(sd); thisStart.setHours(0,0,0,0);
+    const cycleLen=Math.round((thisStart-prevStart)/(1000*60*60*24));
+    if(cycleLen>=18 && cycleLen<=60){ // sanity check
+      const h=getHistory();
+      h.push({start:log[0].date, end:sd, length:cycleLen});
+      if(h.length>12)h.splice(0,h.length-12); // keep last 12
+      saveHistory(h);
+    }
+  }
+
+  // Now handle the mid-week conflict logic
+  const today=new Date(sd); today.setHours(0,0,0,0);
+  const thisSunday=sundayOnOrBefore(today);
+  const nextSunday=new Date(thisSunday); nextSunday.setDate(nextSunday.getDate()+7);
+  const isSunday=today.getDay()===0;
+
+  if(isSunday){
+    // Clean reset — no conflict, apply immediately
+    saveAnchor({date:sd, day:1, pending:null});
+    gen();
+    buildLogStrip();
+  } else {
+    // Mid-week — update phase display immediately but keep prepped meals
+    const daysToNextSun=Math.round((nextSunday-today)/(1000*60*60*24));
+    const dayOnNextSun=daysToNextSun+1;
+    const nextSunStr=nextSunday.getFullYear()+'-'+(String(nextSunday.getMonth()+1).padStart(2,'0'))+'-'+(String(nextSunday.getDate()).padStart(2,'0'));
+    const oldAnchor=getAnchor();
+    saveAnchor({
+      date:oldAnchor.date, day:oldAnchor.day,
+      pending:{date:nextSunStr, day:dayOnNextSun},
+      periodToday:sd  // flag for conflict banner
+    });
+    gen();
+    buildLogStrip();
+    updateConflictBanner();
+  }
+  buildCycleHistory();
+}
+
+function buildLogStrip(){
+  const strip=document.getElementById('log-strip');
+  const dotsEl=document.getElementById('log-dots');
+  if(!strip||!dotsEl)return;
+  strip.style.display='block';
+
+  const log=getLog();
+  const sd=getTodayStr();
+
+  // Update button states
+  const todayEntry=log.find(l=>l.date===sd);
+  strip.querySelectorAll('.log-btn').forEach(btn=>{
+    btn.style.opacity=todayEntry?'0.5':'1';
+    btn.style.transform='';
+  });
+  if(todayEntry){
+    const activeBtn=strip.querySelector(`.log-btn.${todayEntry.type}`);
+    if(activeBtn){activeBtn.style.opacity='1'; activeBtn.style.transform='scale(1.02)';}
+  }
+
+  // Show last 7 days as dots
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))+'-'+(String(d.getDate()).padStart(2,'0'));
+    const entry=log.find(l=>l.date===ds);
+    const dayLabel=d.toLocaleDateString('en-AU',{weekday:'short'}).slice(0,1);
+    const isToday=ds===sd;
+    days.push({ds, type:entry?.type||null, label:dayLabel, isToday});
+  }
+
+  dotsEl.innerHTML=days.map(d=>`
+    <div class="log-dot-wrap">
+      <div class="log-dot${d.type?' '+d.type:''}" style="${d.isToday?'box-shadow:0 0 0 2px var(--text)':''}"></div>
+      <div class="log-dot-date" style="${d.isToday?'color:var(--text);font-weight:800':''}">${d.label}</div>
+    </div>`).join('');
+}
+
+function updateConflictBanner(){
+  const banner=document.getElementById('conflict-banner');
+  const body=document.getElementById('conflict-body');
+  if(!banner||!body)return;
+
+  const anchor=getAnchor();
+  if(!anchor.pending || !anchor.periodToday){
+    banner.style.display='none';
+    return;
+  }
+
+  const periodDate=new Date(anchor.periodToday);
+  const nextSunDate=new Date(anchor.pending.date);
+  const periodStr=periodDate.toLocaleDateString('en-AU',{day:'numeric',month:'long'});
+  const nextSunStr=nextSunDate.toLocaleDateString('en-AU',{day:'numeric',month:'long'});
+
+  // Predict next period
+  const pred=predictNextPeriod();
+  const avgLen=getAvgCycleLength();
+
+  body.innerHTML=`Your period started <strong>${periodStr}</strong>. Your phase and calorie target have updated to <strong>Menstrual</strong> immediately.<br><br>
+    Your bowl toppings change <strong>today</strong> — swap to flaxseed + pumpkin seeds + banana 🍌<br><br>
+    Your prepped lunch and dinner meals this week stay as planned. <strong>New menstrual phase meals begin ${nextSunStr}.</strong>
+    ${pred?`<div class="next-period-badge">🩸 Next period predicted around ${pred.date.toLocaleDateString('en-AU',{day:'numeric',month:'long'})} · avg cycle ${avgLen} days</div>`:''}`;
+
+  banner.style.display='block';
+}
+
+function buildCycleHistory(){
+  const el=document.getElementById('guide-history');
+  if(!el)return;
+  const h=getHistory().slice().reverse(); // most recent first
+  const avg=getAvgCycleLength();
+  const pred=predictNextPeriod();
+  const log=getLog().filter(l=>l.type==='period').sort((a,b)=>b.date.localeCompare(a.date));
+
+  let html=`<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)">
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">Your cycle</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="hero-cal-badge">📊 Avg ${avg} days</span>
+      ${pred?`<span class="next-period-badge">🩸 Next ~${pred.date.toLocaleDateString('en-AU',{day:'numeric',month:'long'})}</span>`:'<span style="font-size:12px;color:var(--muted)">Log 1+ period to see prediction</span>'}
+    </div>`;
+
+  if(h.length===0){
+    html+=`<div style="font-size:13px;color:var(--muted);line-height:1.6">No cycle history yet. Tap 🩸 Period on the Today screen each time your period starts to build your cycle profile.</div>`;
+  } else {
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Cycle history</div>`;
+    h.forEach((c,i)=>{
+      const startDate=new Date(c.start).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+      const endDate=new Date(c.end).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+      const longShort=c.length>avg?'+':'';
+      html+=`<div class="cycle-hist-row">
+        <div><div class="cycle-hist-num">Cycle ${h.length-i}</div><div class="cycle-hist-date">${startDate} – ${endDate}</div></div>
+        <div class="cycle-hist-len">${longShort}${c.length} days</div>
+      </div>`;
+    });
+  }
+  html+=`</div>`;
+
+  // Recent log dots — last 30 days
+  const thirtyDays=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))+'-'+(String(d.getDate()).padStart(2,'0'));
+    const entry=getLog().find(l=>l.date===ds);
+    thirtyDays.push({ds, type:entry?.type||null, day:d.getDate()});
+  }
+
+  html+=`<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">Last 30 days</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">
+      ${thirtyDays.map(d=>`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;width:calc(100%/10 - 4px)">
+        <div style="width:22px;height:22px;border-radius:50%;background:${d.type==='period'?'var(--p1)':d.type==='spotting'?'var(--p3)':d.type==='good'?'var(--p2)':'var(--surface2)'};border:1px solid ${d.type?'transparent':'var(--border)'}"></div>
+        <div style="font-size:8px;color:var(--muted)">${d.day}</div>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:var(--muted)">
+      <span><span style="color:var(--p1)">●</span> Period</span>
+      <span><span style="color:var(--p3)">●</span> Spotting</span>
+      <span><span style="color:var(--p2)">●</span> All good</span>
+    </div>
+  </div>`;
+
+  el.innerHTML=html;
+}
+
+// ── LOCALSTORAGE ERROR HANDLING ───────────────────────────────────────
+function lsSafe(fn){ try{ return fn(); }catch(e){ return null; } }
+
+// On load — set greeting, auto-generate using stored/default anchor
+updateGreeting();
+setInterval(updateGreeting,60000);
+setInterval(()=>{if(plan.length>0)buildTimeline(plan[0].date);},60000);
+
+document.getElementById('setup-card').style.display='none';
+document.getElementById('today-content').style.display='block';
+gen();
+buildLogStrip();
+updateConflictBanner();
+</script>
+
+<script>
+// Service worker disabled — not required for PWA home screen install
+</script>
+</main>
+</body>
+</html>
